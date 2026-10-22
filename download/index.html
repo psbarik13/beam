@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f2740">
+<title>Transfer tools</title>
+<style>
+:root {
+  --field: #0f2740; --ink: #0f2740; --text: #13202d; --muted: #586b7f; --paper: #f3f6f9; --surface: #fff; --line: #d8e1ea;
+  --accent: #1d4e7a; --accent-ink: #fff; --manila: #e8d5a2;
+  --display: Bahnschrift, "DIN Alternate", sans-serif-condensed, "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #e6eef6; --text: #dfe8f1; --muted: #8ea4ba; --paper: #0e1e2f; --surface: #142a40; --line: #22405c; --accent: #84b6e6; --accent-ink: #0b1d2e; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--text); font: 16px/1.5 var(--body); }
+main { max-width: 760px; margin: 0 auto; padding: 40px 20px 60px; }
+h1 { font-family: var(--display); font-weight: 600; font-size: 34px; color: var(--ink); margin: 0 0 6px; }
+.lede { color: var(--muted); margin: 0 0 28px; max-width: 52ch; }
+.tool { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-bottom: 16px; display: grid; grid-template-columns: 56px 1fr; gap: 18px; }
+.tool svg { width: 56px; height: 56px; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 24px; color: var(--ink); margin: 0 0 4px; }
+.tool p { margin: 0 0 14px; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+a.btn { display: inline-flex; align-items: center; height: 46px; padding: 0 18px; border-radius: 12px; border: 1px solid var(--line); color: var(--ink); text-decoration: none; font-weight: 600; }
+a.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.small { font-size: 14px; color: var(--muted); margin-top: 12px; }
+@media (max-width: 520px) { .tool { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Transfer tools</h1>
+  <p class="lede">Two ways to move files between a computer and a phone.</p>
+
+  <section class="tool">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f2740"/><path d="M16 16h12v12H16zM36 16h12v12H36zM16 36h12v12H16z" fill="#e8d5a2"/><path d="M38 38h4v4h-4zM44 44h4v4h-4zM38 46h3v2h-3z" fill="#e8d5a2"/></svg>
+    <div>
+      <h2>Beam</h2>
+      <p>Sends a file through a stream of QR codes, screen to camera. No network at all, so it works where Wi-Fi sharing is blocked. Open it on both devices.</p>
+      <div class="actions">
+        <a class="btn primary" href="../">Open Beam</a>
+        <a class="btn" href="beam.zip" download>Download to run locally</a>
+      </div>
+      <p class="small">On a phone, use this page's https link so the camera works. On a computer, the download includes start-beam, which opens Beam with camera access.</p>
+    </div>
+  </section>
+
+  <section class="tool">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f2740"/><path d="M20 12h20l10 10v30H20z" fill="#e8d5a2"/><circle cx="35" cy="22" r="4" fill="#0f2740"/><path d="M27 34h16M27 41h11" stroke="#0f2740" stroke-width="3.5" stroke-linecap="round"/></svg>
+    <div>
+      <h2>Courier</h2>
+      <p>Shares a folder on your PC or Mac with your phone over Wi-Fi: upload, download, make folders, and stream videos. Scan a QR code to connect.</p>
+      <div class="actions">
+        <a class="btn primary" href="courier.zip" download>Download for Windows and Mac</a>
+      </div>
+      <p class="small">Runs on your computer with Node.js. Unzip, then double-click start.bat (Windows) or start.command (Mac).</p>
+    </div>
+  </section>
+</main>
+</body>
+</html>
