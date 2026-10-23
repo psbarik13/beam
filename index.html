@@ -176,6 +176,11 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
 .reticle.wide { width: min(94vw, calc((100vh - var(--head-h) - 90px) * 16 / 9)); aspect-ratio: 16 / 9; }
 .rtop { position: absolute; top: 0; left: 0; right: 0; padding: calc(12px + var(--safe-t)) 16px 18px; background: linear-gradient(rgba(5,13,22,0.75), transparent); display: flex; align-items: center; gap: 10px; pointer-events: none; }
 .rtop .msg { flex: 1; font-size: 15px; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+/* the code being read, as a map of its parts: green read, grey not yet; the box is what the camera sees now */
+.cmap { position: absolute; right: 12px; top: calc(92px + var(--safe-t)); width: min(40vw, 210px); background: rgba(10, 25, 41, 0.92); border-radius: 14px; padding: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 2; pointer-events: none; }
+.cmap canvas { display: block; width: 100%; height: auto; border-radius: 6px; }
+.cmap p { margin: 6px 2px 0; font-size: 12.5px; line-height: 1.35; }
+.cmap p b { font-weight: 600; }
 /* the last photo, as a map: green dots read, red dots not read */
 .pcard { position: absolute; left: 12px; bottom: calc(var(--head-h) + var(--safe-b) + 12px); width: min(46vw, 300px); background: rgba(10, 25, 41, 0.92); border-radius: 14px; padding: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 2; }
 .pcard canvas { display: block; width: 100%; height: auto; border-radius: 8px; background: #000; }
@@ -508,6 +513,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
   <canvas class="overlay" id="overlay" aria-hidden="true"></canvas>
   <div class="reticle" id="reticle"></div>
   <div class="rtop"><span class="msg" id="rMsg">Starting camera…</span></div>
+  <div class="cmap" id="cMap" hidden><canvas id="cMapCv" width="210" height="120"></canvas><p id="cMapText"></p></div>
   <div class="pcard" id="pCard" hidden><canvas id="pCanvas" width="300" height="200"></canvas><p id="pText"></p><button class="pclose" id="pClose" type="button" aria-label="Hide the photo">×</button></div>
   <div class="rpanel" id="rpanel">
     <div class="rhead" id="rhead" role="button" tabindex="0" aria-expanded="false" aria-controls="rbody" aria-label="Progress. Swipe up or tap for details and settings.">
@@ -10442,6 +10448,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (rx.stream) rx.stream.getTracks().forEach((t) => t.stop());
     video.srcObject = null;
     $('pCard').hidden = true;
+    $('cMap').hidden = true;
     rx.finished = true;
     rx = null;
     keepAwake(false);
@@ -10499,6 +10506,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   function resetRecvUi() {
     setSheet(false);
     $('pCard').hidden = true;
+    $('cMap').hidden = true;
     $('photoBtn').classList.remove('busy');
     $('rTip').hidden = true;
     $('testCard').hidden = true;
@@ -10530,6 +10538,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const now = performance.now();
     rx.gridInfo = info;
     rx.gridAt = now;
+    if (info.locked) mapFromLock(info);
     if (info.size && (info.anchors || (info.sweep && info.markPts && info.markPts.length))) rx.ov = { kind: 'grid', info, t: now };
     if (info.sweep && info.ok) rx.sweepAt = now;
     rx.gridLog.push([now, info.ok || 0, info.failed || 0, info.fixed || 0, info.dup || 0, info.anchors || 0, info.locked ? 1 : 0]);
@@ -10747,7 +10756,12 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
         if (rx.hadProgress) toast('A different file started on the sender. Starting over.');
         rx.startedAt = now;
         rx.reads = []; rx.seqs.clear(); rx.innov = [];
+        rx.allSeqs = new Set();
+        if (rx.cmap) { rx.cmap.frames.clear(); rx.cmap.view = []; }
       }
+      if (!rx.allSeqs) rx.allSeqs = new Set();
+      rx.allSeqs.add(res.seq);
+      mapSeq(res.seq, now);
       rx.hadProgress = true;
       rx.tiles = rx.mode === 'grid' ? rx.gridBlocks || 1 : res.tiles || 1;
       rx.reads.push(now);
@@ -10826,6 +10840,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
         uniqueRate = t1 - t0 > 400 ? (run.length * 1000) / (t1 - t0) : 0;
       }
     }
+    rx.senderRate = senderRate;
     const grid = rx.mode === 'grid';
     $('rReadsL').textContent = grid ? 'Blocks read' : 'Codes read';
     $('rSenderL').textContent = grid ? 'Sender frames' : 'Sender';
@@ -10861,7 +10876,11 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const gridReader = rx.decoder && (rx.decoder instanceof GridReader || rx.decoder instanceof AutoReader);
     const blockRate = gOk + gFail ? gOk / (gOk + gFail) : 1;
     const A = gridReader ? assistCamera(now, gi, gOk, gFail) : null;
-    if (A && A.struggling && now - A.since > 1000) {
+    const zoomedIn = rx.zoomCaps && rx.zoomCaps.auto && rx.zoomCaps.cur > rx.zoomCaps.base + 0.2;
+    if (zoomedIn && rx.sweepAt && now - rx.sweepAt < 3000) {
+      hint.textContent = `Zoomed in ${rx.zoomCaps.cur.toFixed(1)}×: reading the code part by part. Move slowly over the parts that are grey on the map.`;
+      hint.classList.add('ok');
+    } else if (A && A.struggling && now - A.since > 1000) {
       const px = gi.cellPx ? ` (${gi.cellPx} px)` : '';
       hint.textContent = photoSupported() && !A.noPhoto
         ? `The squares are too small for video${px}, so Beam takes full-resolution photos. Hold the phone still over the code.`
@@ -10913,6 +10932,10 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const sweeping = rx.sweepAt && now - rx.sweepAt < 3000;
     const status = r.id != null ? `Receiving ${fmtBytes(r.total)}. ${sweeping ? 'Keep the camera steady as you move it.' : 'Keep both screens steady.'}` : 'Point the camera at the code: on a screen or on paper.';
     $('rMsg').textContent = hint.textContent && !hint.classList.contains('ok') ? hint.textContent : status;
+    const m = rx.cmap;
+    const still = m && (senderRate == null || senderRate < 2 * m.per); // a page or a still image, not a live sender
+    const parts = (rx.sweepAt && now - rx.sweepAt < 5000) || (A && A.struggling) || (rx.zoomCaps && rx.zoomCaps.auto);
+    drawMap(now, !!(still && parts && !rx.test && r.rank < (r.K || Infinity)));
     const ctx = { now, camFps, decFps, dropShare, caught, senderRate, tl, gOk, gFail, gFixed, gi };
     const testing = renderTest(ctx);
     renderAdvice(testing ? null : adviseSender(ctx));
@@ -10924,17 +10947,65 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   // as a small map: green dots read, red dots not read, so it's clear where a closer photo is needed.
   const PHOTO_AREA = 16e6; // iPhone canvases stop at about 16.7 megapixels
   const photoSupported = () => typeof ImageCapture === 'function';
-  function codeBox(gi) {
-    const pts = gi.markPts && gi.markPts.length ? gi.markPts : gi.quad || gi.anchorPts;
-    if (!pts || !pts.length) return null;
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    for (let i = 0; i < pts.length; i += 2) {
-      if (pts[i] < x0) x0 = pts[i]; if (pts[i] > x1) x1 = pts[i];
-      if (pts[i + 1] < y0) y0 = pts[i + 1]; if (pts[i + 1] > y1) y1 = pts[i + 1];
+  // ---- the code map. A whole code in view gives its layout (from its corner squares and settings strip); every
+  // block after that is placed by its sequence number: exports number their blocks in order, code by code, so
+  // block i of code f has number f x (blocks per code) + i.
+  function mapFromLock(gi) {
+    if (!gi.W || !gi.H || !gi.colours) return;
+    const bits = { 2: 1, 4: 2, 8: 3 }[gi.colours], ecc = ['L', 'M', 'H'].indexOf(gi.ecc);
+    const m = rx.cmap;
+    if (m && m.W === gi.W && m.H === gi.H && m.bits === bits && m.ecc === ecc) return;
+    const L = bits && ecc >= 0 ? G.layout(gi.W, gi.H, bits, ecc) : null;
+    if (!L || !L.blocks.length) return;
+    rx.cmap = { W: gi.W, H: gi.H, bits, ecc, L, per: L.blocks.length, frames: new Map(), view: [], cur: -1 };
+    if (rx.allSeqs) for (const sq of rx.allSeqs) mapSeq(sq, 0);
+  }
+  function mapSeq(seq, now) {
+    const m = rx && rx.cmap;
+    if (!m || seq == null) return;
+    const f = Math.floor(seq / m.per), i = seq % m.per;
+    let got = m.frames.get(f);
+    if (!got) { got = new Uint8Array(m.per); m.frames.set(f, got); }
+    got[i] = 1;
+    if (now) { m.view.push([f, i, now]); m.cur = f; }
+  }
+  function drawMap(now, show) {
+    const m = rx.cmap, box = $('cMap');
+    if (!show || !m) { box.hidden = true; return; }
+    while (m.view.length && now - m.view[0][2] > 900) m.view.shift();
+    const f = m.cur >= 0 ? m.cur : 0, got = m.frames.get(f) || new Uint8Array(m.per), L = m.L;
+    const cv = $('cMapCv'), W = 210, k = W / L.W, H = Math.max(40, Math.round(L.H * k));
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    const c = cv.getContext('2d');
+    c.fillStyle = '#f4f1e8';
+    c.fillRect(0, 0, W, H);
+    // corner squares
+    c.fillStyle = '#14222e';
+    const a = 7 * L.A * k;
+    for (const [x, y] of [[0, 0], [W - a, 0], [0, H - a], [W - a, H - a]]) c.fillRect(x, y, a, a);
+    let n = 0;
+    for (let i = 0; i < m.per; i++) {
+      const B = L.blocks[i];
+      c.fillStyle = got[i] ? '#3fa36b' : '#b9bec4';
+      c.fillRect(B.x0 * k + 0.5, B.y0 * k + 0.5, Math.max(1, L.bw * k - 1), Math.max(1, L.bh * k - 1));
+      if (got[i]) n++;
     }
-    // a mark sits at a block's corner: its block reaches further
-    const pad = gi.markPts && gi.markPts.length ? (gi.cellPx || 4) * 30 : 0;
-    return { x0: x0 - pad, y0: y0 - pad, x1: x1 + pad, y1: y1 + pad };
+    // where the camera is now: the blocks it read in the last moment
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [vf, i] of m.view) {
+      if (vf !== f) continue;
+      const B = L.blocks[i];
+      x0 = Math.min(x0, B.x0); y0 = Math.min(y0, B.y0); x1 = Math.max(x1, B.x0 + L.bw); y1 = Math.max(y1, B.y0 + L.bh);
+    }
+    if (x1 > x0) {
+      c.strokeStyle = '#e0a200';
+      c.lineWidth = 3;
+      c.strokeRect(x0 * k, y0 * k, (x1 - x0) * k, (y1 - y0) * k);
+    }
+    const codes = m.frames.size;
+    $('cMapText').innerHTML = (codes > 1 ? `<b>Code ${f + 1}</b> (${codes} seen): ` : '<b>This code:</b> ') + `${n} of ${m.per} parts read. ` +
+      (n >= m.per ? (codes > 1 || m.per < (rx.prog.K || 0) ? 'Done: move to the next code.' : 'All read.') : 'Point at the grey parts' + (x1 > x0 ? ' (the box is where the camera is).' : '.'));
+    box.hidden = false;
   }
   function setZoom(v) {
     const z = rx.zoomCaps;
@@ -10959,27 +11030,23 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     // back to the starting zoom once the code has been gone a while
     if (z && z.auto && now - A.lastSeen > 4000) { setZoom(z.base); z.auto = false; }
     if (!A.struggling || now - A.since < 1000) return A;
-    // 1. zoom in, keeping everything found in view (zoom crops around the middle)
+    // 1. zoom in until the squares are big enough, even past the code's edges: then it reads part by part,
+    // and the code map shows which parts are still missing
     if (z && now - A.zoomAt > 1500 && now - z.manualAt > 6000 && !rx.photoBusy) {
-      const box = codeBox(gi);
-      if (box) {
-        const [fw, fh] = gi.size, cx = fw / 2, cy = fh / 2;
-        const fit = Math.min(cx / Math.max(1, cx - box.x0, box.x1 - cx), cy / Math.max(1, cy - box.y0, box.y1 - cy));
-        const want = Math.min(gi.cellPx ? 6 / gi.cellPx : 2, fit * 0.95);
-        const next = Math.min(z.max, 4, Math.floor((z.cur * want) / z.step) * z.step);
-        if (want > 1.15 && next > z.cur + z.step / 2) {
-          setZoom(next);
-          z.auto = true;
-          A.zoomAt = now;
-          toast(`Zoomed in to ${next.toFixed(1)}× to see the squares.`);
-          return A;
-        }
+      const want = gi.cellPx ? 5.5 / gi.cellPx : 2;
+      const next = Math.min(z.max, 4, Math.floor((z.cur * want) / z.step) * z.step);
+      if (want > 1.15 && next > z.cur + z.step / 2) {
+        setZoom(next);
+        z.auto = true;
+        A.zoomAt = now;
+        toast(`Zoomed in to ${next.toFixed(1)}× to see the squares. Move over the code part by part.`);
+        return A;
       }
     }
-    // 2. full-resolution photos, when the video reads next to nothing (a live sender that reads in part is left
-    // alone: taking a photo pauses some cameras' video for a moment)
+    // 2. full-resolution photos, only when the video has read nothing at all for a while: taking a photo pauses
+    // some cameras' video for a moment, which would only slow down a sweep that reads
     if (photoSupported() && !A.noPhoto) {
-      if (!rx.photoBusy && now - A.photoAt > 2500 && now - A.zoomAt > 800) { A.photoAt = now; takePhoto(); }
+      if (gOk === 0 && !rx.photoBusy && now - A.photoAt > 2500 && now - A.zoomAt > 800 && !(rx.sweepAt && now - rx.sweepAt < 4000)) { A.photoAt = now; takePhoto(); }
       return A;
     }
     // 3. no photos in this browser: the sharpest video the camera has
@@ -11634,7 +11701,20 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
         : 'One code per page.';
       $('xColNote').textContent = { 2: 'Black and white: for any printer, the most robust.', 4: 'Prints with the cyan, magenta, yellow and black inks. Needs a colour printer.', 8: 'The most data per page, but needs a good colour printer and even light.' }[xs.colours];
     } else {
-      $('xDensNote').textContent = 'Use what reads well from your sender screen. Same as Send works.';
+      // shown full screen on a Full HD screen (landscape; a tall code on a phone held upright): pixels per square
+      const screenPx = (dens) => {
+        const [w, h] = SHAPES[xs.shape] || SHAPES.wide, gg = G.gridFor(w * 10, h * 10, dens), LL = G.layout(gg.W, gg.H, X_BITS[xs.colours], GECC[xs.ecc]);
+        const qq = LL ? X.quietFor(LL) : 4, [sw, sh] = xs.shape === 'tall' ? [1080, 1920] : [1920, 1080];
+        return Math.min(sw / (gg.W + 2 * qq), sh / (gg.H + 2 * qq));
+      };
+      const px = screenPx(xs.dens);
+      const ok = G.PRESETS.filter((d) => screenPx(d) >= 4.5);
+      const best = ok.length ? Math.max(...ok) : G.PRESETS[0];
+      $('xDensNote').textContent = px >= 4.5
+        ? `On a Full HD screen each square is ${px.toFixed(1)} pixels: reads live with a phone camera.`
+        : px >= 2.5
+          ? `On a Full HD screen each square is only ${px.toFixed(1)} pixels: a phone reads it close up, part by part, or on a 4K screen. Density ${best} or lower reads easily.`
+          : `On a Full HD screen each square is only ${px.toFixed(1)} pixels: too small for any camera, even zoomed in (the screen blurs the squares together). Fine for Import. For a camera, choose density ${best} or lower.`;
       $('xColNote').textContent = { 2: 'Black and white: the most robust.', 4: 'The usual choice.', 8: 'The most data, needs a sharp camera close up.' }[xs.colours];
     }
     const unit = { pdf: ['page', 'pages'], png: ['image', 'images'], html: ['frame', 'frames'] }[xs.format];
