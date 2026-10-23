@@ -182,7 +182,8 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
 .cmap p { margin: 6px 2px 0; font-size: 12.5px; line-height: 1.35; }
 .cmap p b { font-weight: 600; }
 /* zoom in use: shown on the camera view, one tap resets it */
-.zchip { position: absolute; left: 12px; top: calc(92px + var(--safe-t)); z-index: 2; border: 0; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13.5px; font-weight: 600; background: rgba(232, 213, 162, 0.95); color: #14222e; box-shadow: 0 4px 14px rgba(0,0,0,0.35); cursor: pointer; }
+.zchip { position: absolute; left: 12px; top: calc(92px + var(--safe-t)); z-index: 2; border: 0; border-radius: 999px; padding: 9px 15px; min-height: 40px; font: inherit; font-size: 13.5px; font-weight: 600; background: rgba(232, 213, 162, 0.95); color: #14222e; box-shadow: 0 4px 14px rgba(0,0,0,0.35); cursor: pointer; }
+.zchip.off { background: rgba(10, 25, 41, 0.85); color: var(--on-field); border: 1px solid rgba(255,255,255,0.3); }
 /* the last photo, as a map: green dots read, red dots not read */
 .pcard { position: absolute; left: 12px; bottom: calc(var(--head-h) + var(--safe-b) + 12px); width: min(46vw, 300px); background: rgba(10, 25, 41, 0.92); border-radius: 14px; padding: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 2; }
 .pcard canvas { display: block; width: 100%; height: auto; border-radius: 8px; background: #000; }
@@ -515,7 +516,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
   <canvas class="overlay" id="overlay" aria-hidden="true"></canvas>
   <div class="reticle" id="reticle"></div>
   <div class="rtop"><span class="msg" id="rMsg">Starting camera…</span></div>
-  <button class="zchip" id="zChip" type="button" hidden>Zoom · Reset</button>
+  <button class="zchip" id="zChip" type="button" hidden>Auto zoom: on</button>
   <div class="cmap" id="cMap" hidden><canvas id="cMapCv" width="210" height="120"></canvas><p id="cMapText"></p></div>
   <div class="pcard" id="pCard" hidden><canvas id="pCanvas" width="300" height="200"></canvas><p id="pText"></p><button class="pclose" id="pClose" type="button" aria-label="Hide the photo">×</button></div>
   <div class="rpanel" id="rpanel">
@@ -9029,7 +9030,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   const PREF_KEY = 'beam.prefs.v1';
   const prefs = Object.assign({
     mode: 'grid', gDensity: 288, gColours: 4, gEcc: 'M', gfps: 15,
-    fps: 10, density: 6, ecl: 'L', tiles: 1, decoder: 'auto', facing: 'environment', camRes: 'hd', camFps: 'max',
+    fps: 10, density: 6, ecl: 'L', tiles: 1, decoder: 'auto', facing: 'environment', camRes: 'hd', camFps: 'max', autoZoom: true,
   }, (() => {
     try { return JSON.parse(localStorage.getItem(PREF_KEY)) || {}; } catch { return {}; }
   })());
@@ -10560,6 +10561,13 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     rx.gridInfo = info;
     rx.gridAt = now;
     if (info.locked) mapFromLock(info);
+    const sc = rx.assist && rx.assist.scan;
+    if (sc && sc.phase === 'aim' && sc.target && info.locked && info.quad && info.W === sc.W && info.H === sc.H) {
+      const [x, y] = projectQuad(info.quad, info.W, info.H, sc.target.u, sc.target.v);
+      const [fw, fh] = info.size;
+      const r = (Math.min(fw, fh) * 0.11);
+      rx.scanRing = { x, y, r, t: now, size: info.size, ok: Math.hypot(x - fw / 2, y - fh / 2) < r };
+    }
     if (info.size && (info.anchors || (info.sweep && info.markPts && info.markPts.length))) rx.ov = { kind: 'grid', info, t: now };
     if (info.sweep && info.ok) rx.sweepAt = now;
     rx.gridLog.push([now, info.ok || 0, info.failed || 0, info.fixed || 0, info.dup || 0, info.anchors || 0, info.locked ? 1 : 0]);
@@ -10761,6 +10769,22 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       c.fillStyle = '#e8c46a';
       for (let i = 0; i < 8; i += 2) c.fillRect(X(inf.anchorPts[i]) - 5 * dpr, Y(inf.anchorPts[i + 1]) - 5 * dpr, 10 * dpr, 10 * dpr);
     }
+    // zoom scan: a ring on the part to read next, and a cross at the middle to bring it to
+    const ring = rx.scanRing;
+    if (ring && now - ring.t < 1500 && ring.size[0] === fw && ring.size[1] === fh) {
+      c.globalAlpha = 1;
+      c.setLineDash([]);
+      const rx0 = X(ring.x), ry0 = Y(ring.y), rr = Math.max(26 * dpr, ring.r * sc * dpr), mx = (W / 2) * dpr, my = (H / 2) * dpr;
+      c.lineWidth = 5 * dpr;
+      c.strokeStyle = ring.ok ? '#7fd1a3' : '#ffcf4a';
+      c.beginPath(); c.arc(rx0, ry0, rr, 0, 6.2832); c.stroke();
+      c.lineWidth = 3 * dpr;
+      c.beginPath(); c.moveTo(mx - 14 * dpr, my); c.lineTo(mx + 14 * dpr, my); c.moveTo(mx, my - 14 * dpr); c.lineTo(mx, my + 14 * dpr); c.stroke();
+      if (Math.hypot(rx0 - mx, ry0 - my) > rr + 20 * dpr) {
+        c.setLineDash([10 * dpr, 8 * dpr]);
+        c.beginPath(); c.moveTo(mx, my); c.lineTo(rx0, ry0); c.stroke();
+      }
+    }
   }
 
   let flashTimer;
@@ -10888,6 +10912,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     window.__beamDebug = {
       reader: rx.decoder && rx.decoder.name, decodeMs: Math.round(ms), readsPerSec, caught, senderRate, tiles: tl, camFps, decFps, dropped: rx.dropped,
       workers: rx.decoder && rx.decoder.workers, mode: rx.mode, grid: gi, gridOk: gOk, gridFailed: gFail, gridFixed: gFixed, pump: !!rx.pump, dropShare,
+      scan: rx.assist && rx.assist.scan ? { phase: rx.assist.scan.phase, parts: rx.assist.scan.parts, ring: rx.scanRing } : null,
     };
 
     if (r.id != null && r.K) {
@@ -10907,7 +10932,19 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const gridReader = rx.decoder && (rx.decoder instanceof GridReader || rx.decoder instanceof AutoReader);
     const blockRate = gOk + gFail ? gOk / (gOk + gFail) : 1;
     const A = gridReader ? assistCamera(now, gi, gOk, gFail) : null;
-    if (A && A.offCentre) {
+    if (A && A.scan) {
+      const zc2 = rx.zoomCaps;
+      const ringOn = rx.scanRing && now - rx.scanRing.t < 1500, dir = aimWords(ringOn ? rx.scanRing : null), S2 = A.scan;
+      hint.textContent = S2.phase === 'zoomed'
+        ? `Zoomed in ${(zc2.cur / zc2.base).toFixed(1)}× on one part. Hold still while Beam reads it.`
+        : S2.phase === 'closer' ? `Now move the phone straight toward that part, to about 1/${Math.round(S2.zf || 2)} of the distance, and hold still there.`
+          : S2.phase === 'back' ? 'Got that part. Move back until the whole code is in view again.'
+            : S2.target && ringOn
+              ? (dir ? `${dir} to bring the ring to the cross in the middle.` : 'Hold it there…') + (S2.manual ? '' : ' Beam then zooms in on that part.')
+              : 'Show the whole code, so Beam can see where its parts are.';
+      hint.ok = true;
+      hint.top = true; // the instruction to follow: also at the top of the screen
+    } else if (A && A.offCentre) {
       hint.textContent = 'The code is small and off to one side. Move it to the middle of the screen so Beam can zoom in on it, or hold the phone closer.';
     } else if (A && A.struggling && now - A.since > 2000) {
       const px = gi.cellPx ? ` (${gi.cellPx} px)` : '';
@@ -10962,13 +10999,17 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const status = r.id != null ? `Receiving ${fmtBytes(r.total)}. ${sweeping ? 'Keep the camera steady as you move it.' : 'Keep both screens steady.'}` : 'Point the camera at the code: on a screen or on paper.';
     put('rHint', hint.textContent);
     if ($('rHint').classList.contains('ok') !== hint.ok) $('rHint').classList.toggle('ok', hint.ok);
-    put('rMsg', hint.textContent && !hint.ok ? hint.textContent : status);
+    put('rMsg', hint.textContent && (!hint.ok || hint.top) ? hint.textContent : status);
     const zc = rx.zoomCaps, zChip = $('zChip');
-    zChip.hidden = !zc || Math.abs(zc.cur - zc.base) < 0.05;
-    if (!zChip.hidden) put('zChip', `${(zc.cur / zc.base).toFixed(1)}× zoom · Reset`);
+    zChip.hidden = !zc;
+    if (zc) {
+      const zoomed = Math.abs(zc.cur - zc.base) > 0.05;
+      put('zChip', prefs.autoZoom ? `Auto zoom: on${zoomed ? ` · ${(zc.cur / zc.base).toFixed(1)}×` : ''}` : 'Auto zoom: off');
+      if (zChip.classList.contains('off') === !!prefs.autoZoom) zChip.classList.toggle('off', !prefs.autoZoom);
+    }
     const m = rx.cmap;
     const still = m && (senderRate == null || senderRate < 2 * m.per); // a page or a still image, not a live sender
-    const parts = (rx.sweepAt && now - rx.sweepAt < 5000) || (A && A.struggling) || (rx.zoomCaps && rx.zoomCaps.auto);
+    const parts = (rx.sweepAt && now - rx.sweepAt < 5000) || (A && (A.struggling || A.scan)) || (rx.zoomCaps && rx.zoomCaps.auto);
     drawMap(now, !!(still && parts && !rx.test && r.rank < (r.K || Infinity)));
     const ctx = { now, camFps, decFps, dropShare, caught, senderRate, tl, gOk, gFail, gFixed, gi };
     const testing = renderTest(ctx);
@@ -11042,6 +11083,100 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       (n >= m.per ? (codes > 1 || m.per < (rx.prog.K || 0) ? 'Done: move to the next code.' : 'All read.') : 'Point at the grey parts' + (x1 > x0 ? ' (the box is where the camera is).' : '.'));
     box.hidden = false;
   }
+  // grid position (u, v) to frame pixels, through the code's four corners
+  function projectQuad(q, W, H, u, v) {
+    const src = [[0, 0], [W, 0], [W, H], [0, H]], A = [], b = [];
+    for (let i = 0; i < 4; i++) {
+      const [x, y] = src[i], X2 = q[2 * i], Y2 = q[2 * i + 1];
+      A.push([x, y, 1, 0, 0, 0, -X2 * x, -X2 * y]); b.push(X2);
+      A.push([0, 0, 0, x, y, 1, -Y2 * x, -Y2 * y]); b.push(Y2);
+    }
+    for (let c = 0; c < 8; c++) {
+      let m = c;
+      for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[m][c])) m = r;
+      [A[c], A[m]] = [A[m], A[c]]; [b[c], b[m]] = [b[m], b[c]];
+      for (let r = 0; r < 8; r++) if (r !== c) { const f = A[r][c] / A[c][c]; for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k]; b[r] -= f * b[c]; }
+    }
+    const h = b.map((v2, i) => v2 / A[i][i]), z = h[6] * u + h[7] * v + 1;
+    return [(h[0] * u + h[1] * v + h[2]) / z, (h[3] * u + h[4] * v + h[5]) / z];
+  }
+  // Zoom scan, for a still code whose squares are too small even with the whole code zoomed to fill the view.
+  // A phone camera only zooms into the middle of its view, so: at normal zoom, a ring marks the part to read next;
+  // you tilt the phone (same distance) to bring it to the middle; Beam zooms in as far as adds real detail, reads
+  // that part, zooms back out and marks the next. The code map shows what's done.
+  function zoomScan(now, gi, A, z) {
+    const S = A.scan, m = rx.cmap;
+    // without a zoom Beam can control (iPhone, some phones, or auto zoom off), you move the phone closer instead
+    const canZoom = !!(z && prefs.autoZoom);
+    const stop = (why) => { A.scan = null; rx.scanRing = null; if (z && z.cur !== z.base && prefs.autoZoom) setZoom(z.base); if (why) toast(why); };
+    if (z && now - z.manualAt < 1000) return stop();
+    if (canZoom !== !S.manual) return stop(); // auto zoom switched on or off
+    if (rx.prog.K && rx.prog.rank >= rx.prog.K) return stop();
+    if (now - A.lastSeen > 10000) return stop(); // the code has gone
+    // the zoom that still adds detail: squares about 6 camera pixels (beyond that the phone only enlarges pixels)
+    const zf = canZoom ? Math.max(1.3, Math.min(Math.min(z.max, IOS ? z.base * 2 : z.base * 8) / z.base, Math.round((6 / S.cell) / z.step) * z.step)) : Math.max(1.5, Math.min(3, 6 / S.cell));
+    if (S.phase === 'zoomed' || S.phase === 'closer') {
+      const newSince = (rx.lastNew || -Infinity) > S.at;
+      // this part is done when new blocks stop coming; or give up on it after a while with nothing
+      if ((newSince && now - rx.lastNew > 1500) || (!newSince && now - S.at > (S.phase === 'closer' ? 12000 : 6000))) {
+        const key = S.key;
+        if (!newSince) S.tried.set(key, (S.tried.get(key) || 0) + 1);
+        else S.parts++;
+        S.target = null; S.at = now;
+        if (S.phase === 'zoomed') { setZoom(z.base); S.phase = 'aim'; } else S.phase = 'back';
+      }
+      return;
+    }
+    if (S.phase === 'back') {
+      // moved back: the whole code is in view again
+      if (!(gi.locked && now - (rx.gridAt || 0) < 800)) return;
+      S.phase = 'aim'; S.at = now;
+    }
+    // aiming: pick the next part from the map (the most unread blocks one zoomed view covers)
+    if (!m || m.W !== S.W || m.H !== S.H) return;
+    const f = m.cur >= 0 ? m.cur : 0, L = m.L;
+    let got = m.frames.get(f) || new Uint8Array(m.per);
+    // the last code read is complete, yet nothing new arrives: another code (the next page) is in view
+    if (got.every((v) => v)) got = new Uint8Array(m.per);
+    if (!S.target || now - S.at > 15000) {
+      const fw = (gi.size && gi.size[0]) || 1920, fh = (gi.size && gi.size[1]) || 1080;
+      const vw = (0.8 * fw) / zf / S.cell, vh = (0.8 * fh) / zf / S.cell; // the zoomed (or closer) view, in squares
+      let best = null;
+      for (let i = 0; i < m.per; i++) {
+        if (got[i]) continue;
+        const B = L.blocks[i], cu = B.x0 + L.bw / 2, cv = B.y0 + L.bh / 2;
+        const key = `${Math.round(cu / (vw / 2))},${Math.round(cv / (vh / 2))}`;
+        if ((S.tried.get(key) || 0) >= 2) continue;
+        let n = 0;
+        for (let j = 0; j < m.per; j++) {
+          if (got[j]) continue;
+          const C = L.blocks[j];
+          if (Math.abs(C.x0 + L.bw / 2 - cu) < vw / 2 - L.bw / 2 && Math.abs(C.y0 + L.bh / 2 - cv) < vh / 2 - L.bh / 2) n++;
+        }
+        if (!best || n > best.n) best = { n, u: cu, v: cv, key };
+      }
+      if (!best) return stop(S.parts ? null : 'Couldn’t read this code part by part. Hold the phone closer, or tap Photo.');
+      S.target = { u: best.u, v: best.v };
+      S.key = best.key;
+      S.at = now;
+    }
+    // ring in the middle and the code in view: zoom in on it (or ask to move closer)
+    const ring = rx.scanRing;
+    if (ring && ring.ok && now - ring.t < 500 && !rx.photoBusy) {
+      if (canZoom) { setZoom(Math.round((z.base * zf) / z.step) * z.step); S.phase = 'zoomed'; } else S.phase = 'closer';
+      S.zf = zf;
+      S.at = now;
+      rx.scanRing = null;
+    }
+  }
+  // which way to point the phone: the ring's side of the middle, in words and an arrow
+  function aimWords(ring) {
+    if (!ring) return '';
+    const [fw, fh] = ring.size, dx = ring.x - fw / 2, dy = ring.y - fh / 2, r = ring.r;
+    const h = dx > r ? 'right' : dx < -r ? 'left' : '', v = dy > r ? 'down' : dy < -r ? 'up' : '';
+    const arrow = { 'right': '→', 'left': '←', 'up': '↑', 'down': '↓', 'rightup': '↗', 'rightdown': '↘', 'leftup': '↖', 'leftdown': '↙' }[h + v] || '';
+    return h || v ? `${arrow} Tilt the phone ${[h, v].filter(Boolean).join(' and ')}` : '';
+  }
   function setZoom(v) {
     const z = rx.zoomCaps;
     if (!z || !rx.track) return;
@@ -11074,12 +11209,13 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       }
     }
     if (A.hi > 0 && now - A.hi > 6000 && now - (rx.lastNew || -Infinity) > 6000) { A.hi = -1; raiseResolution(false); } // 4K didn't help
+    if (A.scan) { zoomScan(now, gi, A, z); return A; }
     if (!A.struggling || now - A.since < 2000) return A;
     // 1. zoom in on the code. Only when its corner squares and settings strip were read (so the square size is
     // measured, not guessed) and its squares are too small, and only as far as keeps the whole code in view: a
     // phone camera zooms into the middle of the view, never into a corner. iPhones switch to the telephoto lens
-    // when zoomed in, which can't focus close, so they zoom 2x at most.
-    if (z && gi.locked && gi.quad && gi.cellPx && gi.cellPx < 3.8 && now > (A.zoomBan || 0) && now - A.zoomAt > 2500 && now - z.manualAt > 6000 && !rx.photoBusy) {
+    // when zoomed in, which can't focus close, so they zoom 2x at most. When that isn't enough, a zoom scan.
+    if (z && prefs.autoZoom && gi.locked && gi.quad && gi.cellPx && gi.cellPx < 3.8 && now > (A.zoomBan || 0) && now - A.zoomAt > 2500 && now - z.manualAt > 6000 && !rx.photoBusy && !A.scan) {
       const [fw, fh] = gi.size, cx = fw / 2, cy = fh / 2, q = gi.quad;
       let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
       for (let i = 0; i < 8; i += 2) { x0 = Math.min(x0, q[i]); x1 = Math.max(x1, q[i]); y0 = Math.min(y0, q[i + 1]); y1 = Math.max(y1, q[i + 1]); }
@@ -11088,6 +11224,12 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       const cap = Math.min(z.max, IOS ? z.base * 2 : z.base * 4);
       const want = Math.min(5.5 / gi.cellPx, fit);
       const next = Math.min(cap, Math.floor((z.cur * want) / z.step) * z.step);
+      // a whole-code zoom can't get the squares big enough: read the code part by part instead
+      if (5.5 / gi.cellPx > fit * 1.1 && (z.cur * 5.5) / gi.cellPx > z.cur * 1.3 && cap > z.base * 1.3) {
+        A.scan = { phase: 'aim', manual: false, W: gi.W, H: gi.H, cell: gi.cellPx * (z.base / z.cur), tried: new Map(), at: now, parts: 0 };
+        if (z.cur !== z.base) setZoom(z.base);
+        return A;
+      }
       if (want > 1.15 && next > z.cur + z.step / 2) {
         setZoom(next);
         z.auto = true;
@@ -11096,6 +11238,12 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
         return A;
       }
       A.offCentre = room > 1.4 && fit < 1.15;
+    }
+    // 1b. no zoom Beam can use: the same part-by-part scan, moving the phone closer to each part
+    if ((!z || !prefs.autoZoom) && gi.locked && gi.quad && gi.cellPx && gi.cellPx < 3.8 && !A.scan && now > (A.zoomBan || 0)
+      && (!photoSupported() || A.noPhoto || (A.photoMiss || 0) >= 2)) {
+      A.scan = { phase: 'aim', manual: true, W: gi.W, H: gi.H, cell: gi.cellPx * (z ? z.base / z.cur : 1), tried: new Map(), at: now, parts: 0 };
+      return A;
     }
     // 2. full-resolution photos, only when the video has read nothing at all for a while: taking a photo pauses
     // some cameras' video for a moment, which would only slow down a sweep that reads
@@ -11184,6 +11332,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       if (rx !== me || me.finished) return;
       const got = r.packets ? r.packets.length : 0;
       if (got && !me.photoStart) me.photoStart = t0;
+      if (auto && me.assist) me.assist.photoMiss = got ? 0 : (me.assist.photoMiss || 0) + 1;
       if (got) me.asm.postMessage({ type: 'packets', packets: r.packets }, r.packets);
       if (thumb && (!auto || !me.photoCardOff)) showPhotoMap(thumb, w, r.info || {}, got);
       if (thumb && thumb.close && thumb instanceof ImageBitmap) setTimeout(() => thumb.close(), 0);
@@ -11237,14 +11386,19 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (f && rx && !rx.finished) readPhoto(f, false);
   });
   $('pClose').addEventListener('click', () => { $('pCard').hidden = true; if (rx) rx.photoCardOff = true; });
+  // auto zoom on or off (off: Beam never changes the zoom, as for a live screen or moving QR codes)
   $('zChip').addEventListener('click', () => {
+    prefs.autoZoom = !prefs.autoZoom;
+    savePrefs();
     const z = rx && rx.zoomCaps;
-    if (!z) return;
-    setZoom(z.base);
-    z.auto = false;
-    if (rx.assist) rx.assist.zoomBan = Infinity;
-    $('zChip').hidden = true;
-    toast('Zoom reset. Beam won’t zoom by itself again until you start receiving again.');
+    if (z) {
+      if (!prefs.autoZoom) { setZoom(z.base); z.auto = false; }
+      if (rx.assist) { rx.assist.scan = null; rx.assist.zoomBan = 0; }
+      rx.scanRing = null;
+    }
+    put('zChip', prefs.autoZoom ? 'Auto zoom: on' : 'Auto zoom: off');
+    $('zChip').classList.toggle('off', !prefs.autoZoom);
+    toast(prefs.autoZoom ? 'Auto zoom on: Beam zooms in when the squares are too small.' : 'Auto zoom off: Beam won’t change the zoom.');
   });
 
   // ---- speed test display on the receiver
