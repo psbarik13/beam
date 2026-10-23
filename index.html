@@ -237,6 +237,61 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
 .zoombar span { color: #dfe8f1; font-size: 13px; align-self: center; min-width: 46px; text-align: center; font-variant-numeric: tabular-nums; }
 .res-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; padding: 12px 16px calc(12px + var(--safe-b)); background: var(--surface); border-top: 1px solid var(--line); }
 
+/* ---------------------------------------------------------------- password, export, import */
+.protect { margin-top: 12px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); padding: 14px 16px; }
+.protect label { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.protect label b { color: var(--ink); }
+.protect label span { color: var(--muted); font-size: 13.5px; }
+.pwrow { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.pwrow input { height: 44px; border-radius: 11px; border: 1px solid var(--line); background: var(--paper); padding: 0 12px; color: var(--text); min-width: 0; width: 100%; }
+.pwrow button { height: 44px; border-radius: 11px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); padding: 0 14px; font-weight: 600; font-size: 14px; }
+.pwnote { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
+.pwnote.weak { color: var(--warn); }
+.filebtn { position: relative; overflow: hidden; display: grid; place-items: center; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font-weight: 600; font-size: 14px; cursor: pointer; }
+.filebtn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+.filebtn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg-light button[disabled] { opacity: 0.45; pointer-events: none; }
+.modal { position: fixed; inset: 0; z-index: 40; background: rgba(5, 13, 22, 0.55); display: flex; align-items: flex-end; justify-content: center; }
+.mbox { width: 100%; max-width: 560px; max-height: 100%; display: flex; flex-direction: column; background: var(--paper); border-radius: 18px 18px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.35); overflow: hidden; }
+@media (min-width: 640px) { .modal { align-items: center; } .mbox { border-radius: 18px; max-height: calc(100% - 48px); } }
+.mhead { flex: none; padding: calc(16px + var(--safe-t)) 18px 12px; display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid var(--line); background: var(--surface); }
+@media (min-width: 640px) { .mhead { padding-top: 16px; } }
+.mhead b { font-family: var(--display); font-weight: 600; font-size: 22px; color: var(--ink); flex: none; }
+.mhead span { color: var(--muted); font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.mbody { overflow-y: auto; overscroll-behavior: contain; padding: 4px 18px 14px; }
+.mrow { margin: 14px 0 0; }
+.mrow > .ml { display: block; font-size: 13.5px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.mnote { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+.mnote:empty { display: none; }
+.seg-light.seg3l { grid-template-columns: repeat(3, 1fr); }
+.seg-light.seg2x2 { grid-template-columns: repeat(2, 1fr); }
+.stepper { display: grid; grid-template-columns: 44px 1fr 44px; gap: 6px; align-items: center; }
+.stepper button { height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 20px; line-height: 1; }
+.stepper output { text-align: center; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.quick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.quick button { height: 34px; border-radius: 17px; border: 1px solid var(--line); background: var(--surface); color: var(--accent); font-weight: 600; font-size: 13.5px; padding: 0 12px; }
+.mfoot { flex: none; border-top: 1px solid var(--line); padding: 12px 18px calc(12px + var(--safe-b)); background: var(--surface); }
+.xcount { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.xcount b { font-family: var(--display); font-weight: 600; font-size: 34px; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+.xcount span { font-weight: 600; color: var(--ink); }
+.xcount small { flex-basis: 100%; color: var(--muted); font-size: 13px; }
+.xcount.bad b, .xcount.bad span { color: var(--warn); }
+.mbtns { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+.mbtns.three { grid-template-columns: repeat(3, 1fr); }
+.mbtns .btn, .mbtns .filebtn { height: 48px; border-radius: 13px; font-size: 15.5px; }
+.mbtns .filebtn { background: var(--surface); }
+.mprog { height: 8px; border-radius: 8px; background: var(--line); overflow: hidden; margin: 14px 0 6px; }
+.mprog i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 8px; transition: width .2s linear; }
+.mstat { font-size: 14.5px; color: var(--text); margin: 8px 0 0; }
+.mstat b { color: var(--ink); }
+.mlog { list-style: none; padding: 0; margin: 10px 0 0; font-size: 13px; color: var(--muted); max-height: 30vh; overflow-y: auto; }
+.mlog li { padding: 4px 0; border-bottom: 1px solid var(--line); }
+.mlog li.bad { color: var(--warn); }
+.pwerr { color: var(--warn); font-size: 14px; margin: 8px 0 0; min-height: 1.2em; }
+.res-head .lock { color: var(--accent); font-weight: 600; }
+.xsum { margin: 0; font-size: 13.5px; color: var(--ink); }
+.xsum b { font-weight: 600; }
+
 .toast { position: fixed; left: 50%; top: calc(14px + var(--safe-t)); transform: translateX(-50%); z-index: 50; background: var(--field); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14.5px; max-width: calc(100vw - 32px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 </style>
@@ -260,7 +315,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
       <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0f2740"/><path d="M16 16h12v12H16zM36 16h12v12H36zM16 36h12v12H16z" fill="#e8d5a2"/><path d="M38 38h4v4h-4zM44 44h4v4h-4zM38 46h3v2h-3z" fill="#e8d5a2"/></svg>
       <h1>Beam</h1>
     </div>
-    <p class="lede">Move a file between two devices with a stream of QR codes. No Wi-Fi, cable or account. Open this page on both.</p>
+    <p class="lede">Move a file between two devices through the screen and the camera. No Wi-Fi, cable or account. Open this page on both.</p>
 
     <label class="pick" id="pick">
       <input type="file" id="file" aria-label="Choose a file to send">
@@ -278,12 +333,28 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
       <div class="rbar" id="reduceProg" hidden><i id="reduceBar"></i></div>
       <p class="reduce-info" id="reduceInfo" aria-live="polite"></p>
     </div>
+    <div class="protect" id="protect" hidden>
+      <label for="pw"><b>Password</b><span>optional</span></label>
+      <div class="pwrow">
+        <input type="password" id="pw" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="No password">
+        <button type="button" id="pwShow" aria-pressed="false">Show</button>
+      </div>
+      <p class="pwnote" id="pwNote">With a password, the file is encrypted (AES-256) before it leaves this device. The receiver must type it to open the file; without it nothing can be read, not even the name.</p>
+    </div>
     <p class="warnnote" id="cWarn" hidden></p>
     <p class="warnnote" id="noCam" hidden>No camera found on this device, so it can send but not receive.</p>
     <div class="testentry">
       <div><b>Speed test</b><span>Find the fastest settings for these two devices. Start it here on the sender; on the other device just tap Receive and it measures by itself.</span></div>
       <div class="seg-light seg2l">
         <button type="button" id="testManual">Test pattern</button><button type="button" id="testAuto">Auto sweep</button>
+      </div>
+    </div>
+    <div class="testentry" id="xEntry">
+      <div><b>Export and import</b><span>Export the codes as a PDF to print, images or a slideshow, for any screen or paper. Anyone can scan them with Receive, or load the files or photos of the pages with Import.</span></div>
+      <p class="xsum" id="xSum" hidden></p>
+      <div class="seg-light seg2l">
+        <button type="button" id="exportBtn" disabled>Export…</button>
+        <label class="filebtn">Import…<input type="file" id="importFile" multiple accept="image/*,.pdf,.zip,.html,.htm,application/pdf,application/zip,text/html" aria-label="Import Beam pages, images or photos"></label>
       </div>
     </div>
     <p class="note">To receive, tap Receive and point the camera at the other screen. The camera works when Beam is opened from its https:// link, or on a computer through start-beam (localhost).</p>
@@ -469,6 +540,92 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     <button class="btn" id="homeBtn" type="button">Done</button>
   </nav>
 </section>
+
+
+<!-- ============================================================ EXPORT -->
+<div class="modal" id="xDlg" hidden role="dialog" aria-modal="true" aria-labelledby="xTitle">
+  <div class="mbox">
+    <div class="mhead"><b id="xTitle">Export</b><span id="xFile"></span></div>
+    <div class="mbody" id="xBody">
+      <div class="mrow"><span class="ml">Format</span>
+        <div class="seg-light seg3l" id="xFormat" role="group" aria-label="Format">
+          <button type="button" data-f="pdf">PDF to print</button><button type="button" data-f="png">Images</button><button type="button" data-f="html">Slideshow</button>
+        </div>
+        <p class="mnote" id="xFormatNote"></p>
+      </div>
+      <div class="mrow" data-x="pdf"><span class="ml">Paper</span>
+        <div class="seg-light seg2x2" id="xPage" role="group" aria-label="Paper">
+          <button type="button" data-p="a4l">A4 landscape</button><button type="button" data-p="a4p">A4 portrait</button><button type="button" data-p="ltrl">Letter landscape</button><button type="button" data-p="ltrp">Letter portrait</button>
+        </div>
+      </div>
+      <div class="mrow" data-x="png html"><span class="ml">Shape</span>
+        <div class="seg-light seg3l" id="xShape" role="group" aria-label="Shape">
+          <button type="button" data-s="wide">Wide 16:9</button><button type="button" data-s="tall">Tall 9:16</button><button type="button" data-s="square">Square</button>
+        </div>
+      </div>
+      <div class="mrow"><span class="ml" id="xDensL">Density</span>
+        <div class="stepper"><button type="button" data-xstep="dens" data-d="-1" aria-label="Less dense">−</button><output id="xDens"></output><button type="button" data-xstep="dens" data-d="1" aria-label="More dense">+</button></div>
+        <p class="mnote" id="xDensNote"></p>
+      </div>
+      <div class="mrow"><span class="ml">Colours</span>
+        <div class="seg-light seg3l" id="xColours" role="group" aria-label="Colours"><button type="button" data-c="2">2</button><button type="button" data-c="4">4</button><button type="button" data-c="8">8</button></div>
+        <p class="mnote" id="xColNote"></p>
+      </div>
+      <div class="mrow"><span class="ml">Error correction</span>
+        <div class="seg-light seg3l" id="xEcc" role="group" aria-label="Error correction"><button type="button" data-e="L">L</button><button type="button" data-e="M">M</button><button type="button" data-e="H">H</button></div>
+      </div>
+      <div class="mrow"><span class="ml">Spare pieces</span>
+        <div class="seg-light" id="xExtra" role="group" aria-label="Spare pieces"><button type="button" data-x2="0">None</button><button type="button" data-x2="0.1">10%</button><button type="button" data-x2="0.25">25%</button><button type="button" data-x2="0.5">50%</button></div>
+        <p class="mnote" id="xExtraNote"></p>
+      </div>
+      <div class="mrow" data-x="html"><span class="ml">Speed</span>
+        <div class="stepper"><button type="button" data-xstep="fps" data-d="-1" aria-label="Slower">−</button><output id="xFps"></output><button type="button" data-xstep="fps" data-d="1" aria-label="Faster">+</button></div>
+      </div>
+      <div class="mrow"><span class="ml">Password</span>
+        <div class="pwrow"><input type="password" id="xPw" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="No password"><button type="button" id="xPwShow" aria-pressed="false">Show</button></div>
+        <p class="mnote" id="xPwNote"></p>
+      </div>
+      <div class="quick"><button type="button" id="xSuggest">Suggested settings</button><button type="button" id="xSender">Same as my sender settings</button></div>
+    </div>
+    <div class="mfoot">
+      <div class="xcount" id="xCountBox" aria-live="polite"><b id="xCount">–</b><span id="xCountL"></span><small id="xCountNote"></small></div>
+      <div class="mprog" id="xProg" hidden><i id="xBar"></i></div>
+      <div class="mbtns" id="xBtns"><button class="btn" id="xCancel" type="button">Cancel</button><button class="btn" id="xShare" type="button" hidden>Share</button><button class="btn primary" id="xGo" type="button">Export</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ IMPORT -->
+<div class="modal" id="impDlg" hidden role="dialog" aria-modal="true" aria-labelledby="impTitle">
+  <div class="mbox">
+    <div class="mhead"><b id="impTitle">Import</b><span id="impSub"></span></div>
+    <div class="mbody">
+      <div class="mprog"><i id="impBar"></i></div>
+      <p class="mstat" id="impStat">Reading…</p>
+      <p class="mnote" id="impHint"></p>
+      <ul class="mlog" id="impLog"></ul>
+    </div>
+    <div class="mfoot">
+      <div class="mbtns"><button class="btn" id="impCancel" type="button">Cancel</button><label class="filebtn" id="impMore">Add more images or files<input type="file" id="impMoreFile" multiple accept="image/*,.pdf,.zip,.html,.htm,application/pdf,application/zip,text/html"></label></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ PASSWORD -->
+<div class="modal" id="pwDlg" hidden role="dialog" aria-modal="true" aria-labelledby="pwTitle">
+  <div class="mbox">
+    <div class="mhead"><b id="pwTitle">Password needed</b><span></span></div>
+    <form class="mbody" id="pwForm" autocomplete="off">
+      <p class="mstat">This file is protected. Type the password the sender used.</p>
+      <div class="pwrow" style="margin-top:12px"><input type="password" id="pwIn" autocapitalize="off" spellcheck="false" aria-label="Password" placeholder="Password"><button type="button" id="pwInShow" aria-pressed="false">Show</button></div>
+      <p class="pwerr" id="pwErr" aria-live="assertive"></p>
+      <button type="submit" hidden></button>
+    </form>
+    <div class="mfoot">
+      <div class="mbtns"><button class="btn" id="pwCancel" type="button">Cancel</button><button class="btn primary" id="pwOk" type="button">Open</button></div>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast" hidden role="status"></div>
 
@@ -1132,9 +1289,18 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     return new Uint8Array(await new Response(s).arrayBuffer());
   }
 
+  // "BEAX": encrypted with a password (see export.js). The page asks for the password and opens it.
+  const isLocked = (b) => b.length > 37 && b[0] === 0x42 && b[1] === 0x45 && b[2] === 0x41 && b[3] === 0x58;
+
   async function finish() {
     try {
-      const meta = C.unpackFile(R.assemble());
+      const all = R.assemble();
+      if (isLocked(all)) {
+        const buf = all.slice().buffer;
+        self.postMessage({ type: 'locked', K: R.K, received: R.received, buf }, [buf]);
+        return;
+      }
+      const meta = C.unpackFile(all);
       let content = meta.content;
       if (meta.gzipped) content = await gunzip(content);
       const crc = C.crc32(content);
@@ -4761,11 +4927,11 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
 /* Beam grid reader worker. Runs after core.js and grid.js: finds the colour grid in a camera frame and returns
    every block that passes its error correction and checksum, as standard fountain packets, plus where the grid
    and its blocks are in the frame (for the live outline). Frames arrive from the frame pump as VideoFrames
-   (read in the camera's own YUV format), or from the page as ImageBitmaps or RGBA pixels. */
+   (read in the camera's own YUV format), or from the page as ImageBitmaps or RGBA pixels (imported images). */
 (function () {
   'use strict';
   const G = self.BeamGrid;
-  const dec = new G.GridDecoder();
+  let dec = new G.GridDecoder();
   let canvas = null, cctx = null, buf = null, port = null;
   // Warm up the JIT on a small synthetic frame so the first camera frames decode at full speed.
   try {
@@ -4829,6 +4995,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
   }
   self.onmessage = (e) => {
     const m = e.data;
+    if (m.type === 'reset') { dec = new G.GridDecoder(); return; } // a still image unrelated to the last one (import)
     if (m.type === 'port') {
       port = m.port;
       port.onmessage = (ev) => handle(ev.data, true);
@@ -6672,10 +6839,391 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
 
 </script>
 <script>
+/* Beam export and import formats, and password protection.
+   - Password: the packed file (name, type, content) is encrypted with AES-256-GCM; the key comes from the
+     password through PBKDF2-SHA-256 with a random salt. Envelope: "BEAX" | version | iterations | salt | iv | ciphertext.
+   - Export: a fixed set of grid frames (all chunks plus spare repair pieces), written as a PDF to print,
+     PNG images in a ZIP, or a self-running HTML slideshow for any screen.
+   - Import: reads those back (Beam PDFs, ZIPs, slideshows) or any photo or screenshot of a frame.
+   Works in the page (self.BeamExport) and in Node (require). */
+(function (root) {
+  'use strict';
+  const C = root.BeamCore || (typeof require === 'function' ? require('./core.js') : null);
+  const G = root.BeamGrid || (typeof require === 'function' ? require('./grid.js') : null);
+
+  async function pipe(bytes, stream) {
+    const s = new Blob([bytes]).stream().pipeThrough(stream);
+    return new Uint8Array(await new Response(s).arrayBuffer());
+  }
+  const deflate = (bytes) => pipe(bytes, new CompressionStream('deflate'));
+  const inflate = (bytes, raw) => pipe(bytes, new DecompressionStream(raw ? 'deflate-raw' : 'deflate'));
+
+  // ------------------------------------------------------------------ password protection
+  const XMAGIC = [0x42, 0x45, 0x41, 0x58]; // "BEAX"
+  const ITERATIONS = 250000;
+  const isEncrypted = (b) => b && b.length > 37 && XMAGIC.every((m, i) => b[i] === m);
+  async function keyFrom(password, salt, iterations, usage) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, [usage]);
+  }
+  async function encrypt(bytes, password) {
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await keyFrom(password, salt, ITERATIONS, 'encrypt');
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes));
+    const out = new Uint8Array(37 + ct.length);
+    out.set(XMAGIC, 0);
+    out[4] = 1;
+    new DataView(out.buffer).setUint32(5, ITERATIONS);
+    out.set(salt, 9); out.set(iv, 25); out.set(ct, 37);
+    return out;
+  }
+  /** Throws if the password is wrong (or the data damaged). */
+  async function decrypt(env, password) {
+    if (!isEncrypted(env) || env[4] !== 1) throw new Error('Not a protected Beam file');
+    const iterations = new DataView(env.buffer, env.byteOffset, env.byteLength).getUint32(5);
+    const key = await keyFrom(password, env.slice(9, 25), iterations, 'decrypt');
+    return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: env.slice(25, 37) }, key, env.slice(37)));
+  }
+
+  // ------------------------------------------------------------------ frames
+  /** Plan an export: how many frames, and a generator for them in order. Every chunk goes out about once,
+      plus `extra` (0.25 = 25%) spare repair pieces, so some frames (pages) can be lost. */
+  function exportPlan(payload, W, H, bits, ecc, extra) {
+    const L = G.layout(W, H, bits, ecc);
+    if (!L || !L.blocks.length) throw new Error('These settings do not fit.');
+    const s = new C.Sender(payload);
+    const per = L.blocks.length;
+    // a dozen spare pieces even with no extra: the repair code is random, so exactly K pieces is not always enough
+    const n = Math.max(1, Math.ceil((s.K * (1 + extra) + 12) / per));
+    let i = 0;
+    // any `need` frames are enough: K pieces plus ten makes a full set with odds of about 1000 to 1
+    return { L, n, per, K: s.K, need: Math.min(n, Math.ceil((s.K + 10) / per)), next: () => G.encodeFrame(L, L.blocks.map(() => G.toBlock(s.nextFrame(1))), ++i) };
+  }
+  /** Counts only, without building anything (for live estimates). */
+  function countFrames(payloadLen, W, H, bits, ecc, extra) {
+    const L = G.layout(W, H, bits, ecc);
+    if (!L || !L.blocks.length) return null;
+    const K = Math.max(1, Math.ceil(payloadLen / C.BLOCK)), per = L.blocks.length;
+    const n = Math.max(1, Math.ceil((K * (1 + extra) + 12) / per));
+    return { L, n, per, K, need: Math.min(n, Math.ceil((K + 10) / per)) };
+  }
+  function exportFrames(payload, W, H, bits, ecc, extra) {
+    const plan = exportPlan(payload, W, H, bits, ecc, extra);
+    const frames = [];
+    for (let i = 0; i < plan.n; i++) frames.push(plan.next());
+    return { ...plan, frames };
+  }
+  /** A frame with its white quiet zone, upscaled k times: { w, h, data } (colour-table indices). */
+  function compose(L, idx, quiet, k) {
+    const w = (L.W + 2 * quiet) * k, h = (L.H + 2 * quiet) * k;
+    const data = new Uint8Array(w * h).fill(L.WHITE);
+    for (let y = 0; y < L.H; y++) {
+      for (let ky = 0; ky < k; ky++) {
+        const row = ((y + quiet) * k + ky) * w + quiet * k;
+        for (let x = 0; x < L.W; x++) {
+          const c = idx[y * L.W + x], o = row + x * k;
+          for (let kx = 0; kx < k; kx++) data[o + kx] = c;
+        }
+      }
+    }
+    return { w, h, data };
+  }
+  const quietFor = (L) => L.A + 1;
+
+  // ------------------------------------------------------------------ PNG (indexed colour)
+  function chunk(type, data) {
+    const out = new Uint8Array(12 + data.length);
+    const dv = new DataView(out.buffer);
+    dv.setUint32(0, data.length);
+    for (let i = 0; i < 4; i++) out[4 + i] = type.charCodeAt(i);
+    out.set(data, 8);
+    dv.setUint32(8 + data.length, C.crc32(out.subarray(4, 8 + data.length)));
+    return out;
+  }
+  /** Pack colour indices 4 bits each, high nibble first, each row starting on a byte (the PNG and PDF layout).
+      Half the bytes of 8-bit indices, and it compresses several times better on upscaled frames. */
+  function pack4(img, rowPrefix) {
+    const { w, h, data } = img, rb = (w + 1) >> 1, stride = rb + rowPrefix;
+    const out = new Uint8Array(h * stride);
+    for (let y = 0; y < h; y++) {
+      const o = y * stride + rowPrefix, s = y * w;
+      for (let x = 0; x < w; x += 2) out[o + (x >> 1)] = (data[s + x] << 4) | (x + 1 < w ? data[s + x + 1] : 0);
+    }
+    return out;
+  }
+  async function png(img, palette) {
+    const { w, h } = img;
+    const ihdr = new Uint8Array(13);
+    const dv = new DataView(ihdr.buffer);
+    dv.setUint32(0, w); dv.setUint32(4, h);
+    ihdr[8] = 4; ihdr[9] = 3; // 4-bit indexed colour
+    const plte = new Uint8Array(palette.length * 3);
+    palette.forEach(([r, g, b], i) => { plte[i * 3] = r; plte[i * 3 + 1] = g; plte[i * 3 + 2] = b; });
+    const raw = pack4(img, 1); // filter byte 0 (none) before each row
+    const parts = [new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('PLTE', plte), chunk('IDAT', await deflate(raw)), chunk('IEND', new Uint8Array(0))];
+    return concat(parts);
+  }
+  function concat(parts) {
+    const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+    let o = 0;
+    for (const p of parts) { out.set(p, o); o += p.length; }
+    return out;
+  }
+
+  // ------------------------------------------------------------------ ZIP (stored)
+  function zip(files) {
+    const enc = new TextEncoder();
+    const local = [], central = [];
+    let offset = 0;
+    for (const f of files) {
+      const name = enc.encode(f.name), crc = C.crc32(f.data);
+      const h = new Uint8Array(30 + name.length), dv = new DataView(h.buffer);
+      dv.setUint32(0, 0x04034b50, true); dv.setUint16(4, 20, true); dv.setUint16(6, 0x0800, true);
+      dv.setUint16(10, 0, true); dv.setUint16(12, 0x5021, true);
+      dv.setUint32(14, crc, true); dv.setUint32(18, f.data.length, true); dv.setUint32(22, f.data.length, true);
+      dv.setUint16(26, name.length, true); h.set(name, 30);
+      const c = new Uint8Array(46 + name.length), cv = new DataView(c.buffer);
+      cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true); cv.setUint16(8, 0x0800, true);
+      cv.setUint16(14, 0x5021, true); cv.setUint32(16, crc, true); cv.setUint32(20, f.data.length, true); cv.setUint32(24, f.data.length, true);
+      cv.setUint16(28, name.length, true); cv.setUint32(42, offset, true); c.set(name, 46);
+      local.push(h, f.data);
+      central.push(c);
+      offset += h.length + f.data.length;
+    }
+    const cd = concat(central);
+    const end = new Uint8Array(22), ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
+    ev.setUint32(12, cd.length, true); ev.setUint32(16, offset, true);
+    return concat([...local, cd, end]);
+  }
+  async function unzip(bytes) {
+    const out = [];
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let p = 0;
+    while (p + 30 <= bytes.length && dv.getUint32(p, true) === 0x04034b50) {
+      const flags = dv.getUint16(p + 6, true), method = dv.getUint16(p + 8, true);
+      const size = dv.getUint32(p + 18, true), nl = dv.getUint16(p + 26, true), xl = dv.getUint16(p + 28, true);
+      if (flags & 8) break; // streamed entries (sizes after the data) are not supported
+      const name = new TextDecoder().decode(bytes.subarray(p + 30, p + 30 + nl));
+      const start = p + 30 + nl + xl;
+      const raw = bytes.subarray(start, start + size);
+      if (method === 0) out.push({ name, data: raw });
+      else if (method === 8) out.push({ name, data: await inflate(raw, true) });
+      p = start + size;
+    }
+    return out;
+  }
+
+  // ------------------------------------------------------------------ PDF
+  const PAGES = { a4l: [842, 595], a4p: [595, 842], ltrl: [792, 612], ltrp: [612, 792] };
+  const latin1 = (s) => { const b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i) & 255; return b; };
+  const pdfText = (s) => s.replace(/[^\x20-\x7e\xa0-\xff]/g, '?').replace(/([\\()])/g, '\\$1');
+  /** Grid size that fills a page's printable area at a density. */
+  function pageGrid(page, across) {
+    const [pw, ph] = PAGES[page] || PAGES.a4l;
+    const aw = pw - 2 * 30, ah = ph - 2 * 30 - 18;
+    const g = G.gridFor(aw * 8, ah * 8, across);
+    return { W: g.W, H: g.H, aw, ah, pw, ph };
+  }
+  /** A PDF of n pages, one image each. getPage(i) -> { img: {w, h, data}, palette, caption }, called in order, so
+      only one page's pixels are in memory at a time. Images print scaled to the page, unsmoothed. */
+  async function pdf(n, getPage, page, onProgress) {
+    const [pw, ph] = PAGES[page] || PAGES.a4l;
+    const parts = [];
+    let offset = 0;
+    const offsets = [];
+    const put = (x) => { const b = typeof x === 'string' ? latin1(x) : x; parts.push(b); offset += b.length; };
+    put('%PDF-1.4\n%\xe2\xe3\xcf\xd3\n');
+    const begin = (num) => { offsets[num] = offset; put(`${num} 0 obj\n`); };
+    begin(1); put('<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+    const kids = [];
+    for (let i = 0; i < n; i++) kids.push(`${4 + 3 * i} 0 R`);
+    begin(2); put(`<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${n} >>\nendobj\n`);
+    begin(3); put('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n');
+    for (let i = 0; i < n; i++) {
+      const { img, palette, caption } = await getPage(i);
+      const pageObj = 4 + 3 * i, contentObj = pageObj + 1, imageObj = pageObj + 2;
+      const aw = pw - 60, ah = ph - 60 - 18;
+      const s = Math.min(aw / img.w, ah / img.h);
+      const dw = img.w * s, dh = img.h * s;
+      const x = (pw - dw) / 2, y = 30 + 18 + (ah - dh) / 2;
+      const content = `q ${dw.toFixed(3)} 0 0 ${dh.toFixed(3)} ${x.toFixed(3)} ${y.toFixed(3)} cm /Im0 Do Q\nBT /F1 9 Tf 0.35 0.42 0.5 rg 30 30 Td (${pdfText(caption || '')}) Tj ET\n`;
+      begin(pageObj);
+      put(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im0 ${imageObj} 0 R >> /Font << /F1 3 0 R >> >> /Contents ${contentObj} 0 R >>\nendobj\n`);
+      begin(contentObj);
+      put(`<< /Length ${content.length} >>\nstream\n${content}\nendstream\nendobj\n`);
+      const data = await deflate(pack4(img, 0));
+      const hex = palette.map(([r, g, b]) => [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')).join('');
+      begin(imageObj);
+      put(`<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace [/Indexed /DeviceRGB ${palette.length - 1} <${hex}>] /BitsPerComponent 4 /Interpolate false /Filter /FlateDecode /Length ${data.length} >>\nstream\n`);
+      put(data);
+      put('\nendstream\nendobj\n');
+      if (onProgress && (await onProgress(i + 1, n)) === false) throw new Error('cancelled');
+    }
+    const total = 4 + 3 * n;
+    const xref = offset;
+    let xr = `xref\n0 ${total}\n0000000000 65535 f \n`;
+    for (let k = 1; k < total; k++) xr += `${String(offsets[k]).padStart(10, '0')} 00000 n \n`;
+    put(xr);
+    put(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+    return new Blob(parts, { type: 'application/pdf' });
+  }
+  /** Unpack rows of 1, 2, 4 or 8-bit colour indices (each row starting on a byte) into one index per pixel. */
+  function unpackRows(bytes, w, h, bpc, rowPrefix) {
+    const rb = Math.ceil((w * bpc) / 8), stride = rb + rowPrefix, out = new Uint8Array(w * h), mask = (1 << bpc) - 1;
+    for (let y = 0; y < h; y++) {
+      const o = y * stride + rowPrefix;
+      for (let x = 0; x < w; x++) {
+        const bit = x * bpc;
+        out[y * w + x] = (bytes[o + (bit >> 3)] >> (8 - bpc - (bit & 7))) & mask;
+      }
+    }
+    return out;
+  }
+  function paletteRGBA(idx, w, h, pal) {
+    const rgba = new Uint8ClampedArray(w * h * 4);
+    for (let i = 0; i < w * h; i++) {
+      const c = pal[idx[i]] || [255, 255, 255];
+      rgba[i * 4] = c[0]; rgba[i * 4 + 1] = c[1]; rgba[i * 4 + 2] = c[2]; rgba[i * 4 + 3] = 255;
+    }
+    return rgba;
+  }
+  /** Page images in a PDF: Beam's own frames and other plain images as { w, h, load() -> rgba } (decoded only when
+      asked, so a long PDF never sits in memory as pixels), and JPEG pages (from scanner apps) as { jpeg }.
+      Other image kinds are skipped. */
+  async function pdfImages(bytes) {
+    const text = new TextDecoder('latin1').decode(bytes);
+    const out = [];
+    const re = /\/Subtype\s*\/Image\b/g;
+    let m;
+    while ((m = re.exec(text))) {
+      // the dictionary around this key, and the stream after it
+      const start = text.lastIndexOf('<<', m.index);
+      const sk = text.indexOf('stream', m.index);
+      if (start < 0 || sk < 0) continue;
+      const dict = text.slice(start, sk);
+      let len = /\/Length\s+(\d+)(\s+(\d+)\s+R)?/.exec(dict);
+      if (!len) continue;
+      let n = +len[1];
+      if (len[2]) { // indirect length: "12 0 obj 3456 endobj"
+        const ref = new RegExp(`(^|[^0-9])${len[1]}\\s+${len[3]}\\s+obj\\s*(\\d+)`).exec(text);
+        if (!ref) continue;
+        n = +ref[2];
+      }
+      let ds = sk + 6;
+      if (text[ds] === '\r') ds++;
+      if (text[ds] === '\n') ds++;
+      const data = bytes.subarray(ds, ds + n);
+      re.lastIndex = ds + n;
+      const filter = (/\/Filter\s*\[?\s*\/(\w+)/.exec(dict) || [])[1];
+      if (filter === 'DCTDecode') { out.push({ jpeg: data }); continue; }
+      if (filter !== 'FlateDecode' || /\/DecodeParms/.test(dict)) continue;
+      const w = +(/\/Width\s+(\d+)/.exec(dict) || [])[1], h = +(/\/Height\s+(\d+)/.exec(dict) || [])[1];
+      const bpc = +(/\/BitsPerComponent\s+(\d+)/.exec(dict) || [])[1];
+      if (!w || !h || ![1, 2, 4, 8].includes(bpc)) continue;
+      const ix = /\/Indexed\s*\/DeviceRGB\s+(\d+)\s*<([0-9a-fA-F\s]+)>/.exec(dict);
+      if (ix) {
+        const hex = ix[2].replace(/\s+/g, ''), pal = [];
+        for (let i = 0; i + 6 <= hex.length; i += 6) pal.push([parseInt(hex.slice(i, i + 2), 16), parseInt(hex.slice(i + 2, i + 4), 16), parseInt(hex.slice(i + 4, i + 6), 16)]);
+        out.push({ w, h, load: async () => paletteRGBA(unpackRows(await inflate(data), w, h, bpc, 0), w, h, pal) });
+      } else if (bpc === 8 && /\/DeviceRGB/.test(dict)) {
+        out.push({ w, h, load: async () => {
+          const raw = await inflate(data), rgba = new Uint8ClampedArray(w * h * 4);
+          for (let i = 0; i < w * h && i * 3 + 2 < raw.length; i++) { rgba[i * 4] = raw[i * 3]; rgba[i * 4 + 1] = raw[i * 3 + 1]; rgba[i * 4 + 2] = raw[i * 3 + 2]; rgba[i * 4 + 3] = 255; }
+          return rgba;
+        } });
+      } else if (bpc === 8 && /\/DeviceGray/.test(dict)) {
+        out.push({ w, h, load: async () => {
+          const raw = await inflate(data), rgba = new Uint8ClampedArray(w * h * 4);
+          for (let i = 0; i < w * h && i < raw.length; i++) { rgba[i * 4] = rgba[i * 4 + 1] = rgba[i * 4 + 2] = raw[i]; rgba[i * 4 + 3] = 255; }
+          return rgba;
+        } });
+      }
+    }
+    return out;
+  }
+  /** Beam's own indexed PNGs (4 or 8 bit, no row filters): { w, h, rgba }, or null for any other PNG. */
+  async function readPng(bytes) {
+    if (bytes.length < 33 || bytes[0] !== 137 || bytes[1] !== 80) return null;
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let p = 8, w = 0, h = 0, bpc = 0, ct = 0, il = 0;
+    const pal = [], idat = [];
+    while (p + 12 <= bytes.length) {
+      const len = dv.getUint32(p), type = String.fromCharCode(bytes[p + 4], bytes[p + 5], bytes[p + 6], bytes[p + 7]);
+      const d = bytes.subarray(p + 8, p + 8 + len);
+      if (type === 'IHDR') { w = dv.getUint32(p + 8); h = dv.getUint32(p + 12); bpc = d[8]; ct = d[9]; il = d[12]; }
+      else if (type === 'PLTE') for (let i = 0; i + 3 <= d.length; i += 3) pal.push([d[i], d[i + 1], d[i + 2]]);
+      else if (type === 'IDAT') idat.push(d);
+      else if (type === 'IEND') break;
+      p += 12 + len;
+    }
+    if (ct !== 3 || il || ![1, 2, 4, 8].includes(bpc) || !w || !h) return null;
+    const raw = await inflate(concat(idat));
+    const stride = Math.ceil((w * bpc) / 8) + 1;
+    for (let y = 0; y < h; y++) if (raw[y * stride] !== 0) return null; // filtered rows: let the browser decode it
+    return { w, h, rgba: paletteRGBA(unpackRows(raw, w, h, bpc, 1), w, h, pal) };
+  }
+
+  // ------------------------------------------------------------------ HTML slideshow
+  function b64(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i += 32768) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 32768));
+    return typeof btoa === 'function' ? btoa(s) : Buffer.from(bytes).toString('base64');
+  }
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  /** A self-contained page that shows the frames full screen, in a loop, at `fps`. */
+  function slideshow(frames /* PNG byte arrays */, { title, fps, note }) {
+    const urls = frames.map((p) => `"data:image/png;base64,${b64(p)}"`).join(',\n');
+    return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title>
+<style>
+html,body{margin:0;height:100%;background:#fff;overflow:hidden;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+#stage{position:fixed;left:0;right:0;top:0;bottom:40px;display:grid;place-items:center}
+#f{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+#bar{position:fixed;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;gap:12px;padding:0 12px;background:#0f2740;color:#e6eef6;font-size:13px}
+#bar b{color:#e8d5a2}#bar button{background:#1d4e7a;color:#fff;border:0;border-radius:8px;padding:6px 10px;font:inherit;cursor:pointer}
+#bar span{opacity:.8;margin-left:auto}
+</style></head><body>
+<div id="stage"><img id="f" alt="Beam code"></div>
+<div id="bar"><b>Beam</b><span id="pos"></span><button id="slow" aria-label="Slower">−</button><button id="play">Pause</button><button id="fast" aria-label="Faster">+</button><button id="full">Full screen</button></div>
+<script>
+const F=[${urls}];
+let i=0,fps=${Math.max(1, Math.min(60, fps | 0))},playing=true,t=null;
+const img=document.getElementById('f'),pos=document.getElementById('pos');
+const pre=F.map(u=>{const m=new Image();m.src=u;return m;});
+function fit(){const m=pre[i];if(!m.naturalWidth)return;const d=devicePixelRatio||1,s=Math.max(1,Math.floor(Math.min(innerWidth*d/m.naturalWidth,(innerHeight-40)*d/m.naturalHeight)));img.style.width=m.naturalWidth*s/d+'px';img.style.height=m.naturalHeight*s/d+'px';}
+function show(){img.src=F[i];fit();pos.textContent=${JSON.stringify(note ? note + ' · ' : '')}+'frame '+(i+1)+' of '+F.length+' · '+fps+' a second · scan with Beam (Receive)';}
+function tick(){i=(i+1)%F.length;show();}
+function run(){clearInterval(t);if(playing)t=setInterval(tick,1000/fps);document.getElementById('play').textContent=playing?'Pause':'Play';}
+document.getElementById('play').onclick=()=>{playing=!playing;run();};
+document.getElementById('slow').onclick=()=>{fps=Math.max(1,fps-1);run();show();};
+document.getElementById('fast').onclick=()=>{fps=Math.min(60,fps+1);run();show();};
+document.getElementById('full').onclick=()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();};
+addEventListener('keydown',e=>{if(e.key===' '){playing=!playing;run();}else if(e.key==='ArrowRight'){i=(i+1)%F.length;show();}else if(e.key==='ArrowLeft'){i=(i-1+F.length)%F.length;show();}else if(e.key==='+'||e.key==='='){fps=Math.min(60,fps+1);run();show();}else if(e.key==='-'){fps=Math.max(1,fps-1);run();show();}});
+addEventListener('resize',fit);pre[0].onload=fit;show();run();
+<\/script></body></html>`;
+  }
+  /** The frame images inside a Beam slideshow (or any page with embedded images): data URLs. */
+  function slideshowImages(text) {
+    return (text.match(/data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+/g) || []);
+  }
+
+  const api = {
+    deflate, inflate, encrypt, decrypt, isEncrypted, exportPlan, countFrames, exportFrames, compose, quietFor, png, readPng, zip, unzip, pdf, pdfImages, pageGrid, PAGES,
+    slideshow, slideshowImages,
+  };
+  root.BeamExport = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+</script>
+<script>
 (() => {
   'use strict';
   const C = window.BeamCore;
   const G = window.BeamGrid;
+  const X = window.BeamExport;
   const $ = (id) => document.getElementById(id);
 
   // ------------------------------------------------------------ helpers
@@ -6721,6 +7269,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
   }
   window.addEventListener('popstate', () => { if (current !== 'home') goHome(true); });
   function goHome(fromPop) {
+    for (const id of ['xDlg', 'impDlg', 'pwDlg']) if (!$(id).hidden) { if (id === 'xDlg') closeExport(); else if (id === 'impDlg') closeImport(); else { pwJob = null; $(id).hidden = true; } }
     stopSending();
     stopReceiving();
     clearResult();
@@ -6799,7 +7348,10 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     const seq = ++prepareSeq;
     prepared = null;
     $('sendBtn').disabled = true;
+    $('exportBtn').disabled = true;
+    $('xSum').hidden = true;
     $('chosen').hidden = false;
+    $('protect').hidden = !canEncrypt;
     $('cName').textContent = file.name;
     $('cInfo').textContent = 'Preparing…';
     $('cWarn').hidden = true;
@@ -6820,7 +7372,9 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
       const payload = C.packFile({ name: file.name, type: file.type, bytes: body, gzipped: gz, originalSize: raw.length, crc });
       prepared = { file, payload, gz, originalSize: raw.length };
       describeChosen();
+      xSummary();
       $('sendBtn').disabled = false;
+      $('exportBtn').disabled = false;
     } catch (e) {
       if (seq !== prepareSeq) return;
       $('cInfo').textContent = 'Could not read this file. ' + (e.message || '');
@@ -7084,6 +7638,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     prepareSeq++; // drop any preparation of the previous choice
     prepared = null;
     $('sendBtn').disabled = true;
+    $('exportBtn').disabled = true;
     $('cInfo').textContent = 'Making it smaller…';
     try {
       let out;
@@ -7463,9 +8018,20 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     updateSendStats();
     tx.raf = requestAnimationFrame(sendLoop);
   }
-  function startSending() {
-    if (!prepared) return;
-    beginSend(new C.Sender(prepared.payload), null, prepared.file.name);
+  let sendBusy = false;
+  async function startSending() {
+    if (!prepared || sendBusy) return;
+    sendBusy = true;
+    $('sendBtn').disabled = true;
+    try {
+      const payload = await protectedPayload();
+      beginSend(new C.Sender(payload), null, prepared.file.name + (password ? ' · protected' : ''));
+    } catch (e) {
+      toast('Could not encrypt the file. ' + ((e && e.message) || ''));
+    } finally {
+      sendBusy = false;
+      $('sendBtn').disabled = !prepared;
+    }
   }
 
   // ---- speed test on the sender: endless labelled test frames. Auto sweep loops through settings forever:
@@ -8341,6 +8907,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     if (!rx) return;
     const m = e.data;
     if (m.type === 'file') return finishReceiving(m);
+    if (m.type === 'locked') return finishLocked(m);
     if (m.type === 'error') { finishFailed(m.message); return; }
     if (m.type !== 'progress' || rx.finished) return;
     const now = performance.now();
@@ -8617,10 +9184,26 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     $('rPct').textContent = '100%';
     if (navigator.vibrate) navigator.vibrate(60);
     stopReceiving();
+    deliver(m, { secs, K: m.K, received: m.received });
+  }
+  // The whole file arrived but it is encrypted: ask for the password, then open it.
+  function finishLocked(m) {
+    if (!rx) return;
+    const secs = ((rx.finishing || performance.now()) - rx.startedAt) / 1000;
+    rx.finished = true;
+    $('rBar').style.width = '100%';
+    $('rPct').textContent = '100%';
+    if (navigator.vibrate) navigator.vibrate(60);
+    stopReceiving();
+    $('rMsg').textContent = 'File received. It is protected with a password.';
+    unlock(new Uint8Array(m.buf), { secs, K: m.K, received: m.received });
+  }
+  /** m: { name, mime, verified, crc, buf } -> the result screen. */
+  function deliver(m, ctx) {
     const type = m.mime || guessType(m.name);
     const file = new File([m.buf], m.name || 'beam-file', { type });
-    showResult(file, m.verified, secs);
-    window.__beamResult = { name: file.name, size: file.size, type, verified: m.verified, crc: m.crc, symbols: m.received, K: m.K, secs };
+    showResult(file, m.verified, ctx.secs, ctx);
+    window.__beamResult = { name: file.name, size: file.size, type, verified: m.verified, crc: m.crc, symbols: ctx.received, K: ctx.K, secs: ctx.secs, locked: !!ctx.locked, imported: ctx.imported || 0 };
   }
   function finishFailed(message) {
     stopReceiving();
@@ -8689,13 +9272,16 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     if (resultUrl) { URL.revokeObjectURL(resultUrl); resultUrl = null; }
   }
 
-  function showResult(file, verified, secs) {
+  function showResult(file, verified, secs, ctx = {}) {
     clearResult();
     show('result');
     resultUrl = URL.createObjectURL(file);
     $('resName').textContent = file.name;
     const rate = secs > 0 ? fmtBytes(file.size / secs) + '/s' : '';
-    $('resInfo').innerHTML = `${fmtBytes(file.size)}, received in ${fmtTime(secs)}${rate ? ` (${rate})` : ''}. ` +
+    const how = ctx.imported
+      ? `imported from ${ctx.imported} ${ctx.imported === 1 ? 'image' : 'images'}`
+      : `received in ${fmtTime(secs)}${rate ? ` (${rate})` : ''}`;
+    $('resInfo').innerHTML = `${fmtBytes(file.size)}, ${how}. ` + (ctx.locked ? '<span class="lock">Unlocked with the password.</span> ' : '') +
       (verified ? '<span class="ver">Checksum verified.</span>' : '<span class="bad">Checksum mismatch: the file may be damaged.</span>');
     const save = $('saveBtn');
     save.href = resultUrl;
@@ -8839,7 +9425,564 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
   $('againBtn').addEventListener('click', () => { clearResult(); startReceiving(); });
   $('homeBtn').addEventListener('click', () => goHome());
 
+  // ------------------------------------------------------------ password protection
+  // The packed file (name, type, content) is encrypted with AES-256-GCM before it is sent or exported; the key
+  // comes from the password through PBKDF2. The receiver asks for the password once the whole file has arrived.
+  const canEncrypt = !!(window.crypto && crypto.subtle && X);
+  let password = '';
+  function pwAdvice(p) {
+    if (!p) return { text: 'With a password, the file is encrypted (AES-256) before it leaves this device. The receiver must type it to open the file; without it nothing can be read, not even the name.', weak: false };
+    if (p.length < 10) return { text: 'Short passwords can be guessed by anyone who keeps a copy of the codes. Use 4 or more random words, or 12+ characters.', weak: true };
+    return { text: 'Protected. Tell the receiver the password another way: not written next to the codes.', weak: false };
+  }
+  function setPassword(v, from) {
+    password = v;
+    if (from !== 'home') $('pw').value = v;
+    if (from !== 'export') $('xPw').value = v;
+    const a = pwAdvice(v);
+    $('pwNote').textContent = a.text;
+    $('pwNote').classList.toggle('weak', a.weak);
+    $('xPwNote').textContent = v ? a.text : 'Optional. With one, only people who know it can open the file.';
+    if (!$('xDlg').hidden) { if (xJob && xJob.blob) xEditable(); renderExport(); }
+    if (prepared) xSummary();
+  }
+  $('pw').addEventListener('input', (e) => setPassword(e.target.value, 'home'));
+  $('xPw').addEventListener('input', (e) => setPassword(e.target.value, 'export'));
+  function showToggle(btn, input) {
+    btn.addEventListener('click', () => {
+      const on = input.type === 'password';
+      input.type = on ? 'text' : 'password';
+      btn.textContent = on ? 'Hide' : 'Show';
+      btn.setAttribute('aria-pressed', String(on));
+    });
+  }
+  showToggle($('pwShow'), $('pw'));
+  showToggle($('xPwShow'), $('xPw'));
+  showToggle($('pwInShow'), $('pwIn'));
+  async function protectedPayload() {
+    if (!password) return prepared.payload;
+    return X.encrypt(prepared.payload, password);
+  }
+  async function openPacked(packed) {
+    const meta = C.unpackFile(packed);
+    let content = meta.content;
+    if (meta.gzipped) content = await gunzip(content);
+    const crc = C.crc32(content);
+    return { name: meta.name, mime: meta.type, verified: content.length === meta.originalSize && crc === meta.crc, crc, buf: content };
+  }
+  // Ask for the password until it opens the file, or the person gives up.
+  let pwJob = null;
+  function unlock(env, ctx) {
+    pwJob = { env, ctx, busy: false };
+    $('pwIn').value = '';
+    $('pwErr').textContent = '';
+    $('pwOk').disabled = false;
+    $('pwDlg').hidden = false;
+    setTimeout(() => $('pwIn').focus(), 50);
+  }
+  async function tryPassword() {
+    const job = pwJob;
+    if (!job || job.busy) return;
+    const pw = $('pwIn').value;
+    if (!pw) { $('pwErr').textContent = 'Type the password first.'; return; }
+    job.busy = true;
+    $('pwOk').disabled = true;
+    $('pwErr').textContent = 'Checking…';
+    let packed;
+    try {
+      packed = await X.decrypt(job.env, pw);
+    } catch (e) {
+      job.busy = false;
+      $('pwOk').disabled = false;
+      $('pwErr').textContent = 'Wrong password. Try again.';
+      $('pwIn').select();
+      return;
+    }
+    try {
+      const m = await openPacked(packed);
+      pwJob = null;
+      $('pwDlg').hidden = true;
+      deliver(m, { ...job.ctx, locked: true });
+    } catch (e) {
+      job.busy = false;
+      $('pwErr').textContent = 'The password is right, but the file inside is damaged: ' + ((e && e.message) || e);
+    }
+  }
+  $('pwOk').addEventListener('click', tryPassword);
+  $('pwForm').addEventListener('submit', (e) => { e.preventDefault(); tryPassword(); });
+  $('pwCancel').addEventListener('click', () => { pwJob = null; $('pwDlg').hidden = true; goHome(); });
+
+  // ------------------------------------------------------------ export
+  // A fixed set of grid frames, every chunk plus spare repair pieces, as a PDF to print, PNG images (in a ZIP)
+  // or a slideshow page that plays on any screen. Receive reads them like a live sender; Import reads the files.
+  const LETTER = /^(en-US|en-CA|es-US|es-MX|fil|en-PH)/i.test(navigator.language || '');
+  const X_SUGGEST = {
+    pdf: { dens: 256, colours: 4, ecc: 'H', extra: 0.25 },
+    png: { dens: 288, colours: 4, ecc: 'M', extra: 0.25, fps: 10 },
+    html: { dens: 288, colours: 4, ecc: 'M', extra: 0.25, fps: 10 },
+  };
+  // format, paper and shape are shared; density, colours, error correction, spares and speed are kept per format
+  const X_KEYS = ['dens', 'colours', 'ecc', 'extra', 'fps'];
+  const xf = Object.assign({}, prefs.xf || {});
+  const xs = Object.assign({ format: 'pdf', page: LETTER ? 'ltrl' : 'a4l', shape: 'wide', fps: 10 }, prefs.x || {});
+  if (!X_SUGGEST[xs.format]) xs.format = 'pdf';
+  function xLoad(format) {
+    Object.assign(xs, { fps: 10 }, X_SUGGEST[format], xf[format] || {});
+    if (!G.PRESETS.includes(xs.dens)) xs.dens = X_SUGGEST[format].dens;
+    if (!X_BITS[xs.colours]) xs.colours = 4;
+    if (!(xs.ecc in { L: 1, M: 1, H: 1 })) xs.ecc = 'M';
+  }
+  function xKeep() { xf[xs.format] = Object.fromEntries(X_KEYS.map((k) => [k, xs[k]])); }
+  const SHAPES = { wide: [1920, 1080], tall: [1080, 1920], square: [1440, 1440] };
+  const X_BITS = { 2: 1, 4: 2, 8: 3 };
+  let xJob = null;
+  xLoad(xs.format);
+  function xGrid() {
+    if (xs.format === 'pdf') { const g = X.pageGrid(xs.page, xs.dens); return { W: g.W, H: g.H, page: g }; }
+    const [w, h] = SHAPES[xs.shape] || SHAPES.wide;
+    const g = G.gridFor(w * 10, h * 10, xs.dens); // a large virtual canvas, so the grid follows the density closely
+    return { W: g.W, H: g.H };
+  }
+  const xPayloadLen = () => (prepared ? prepared.payload.length + (password ? 53 : 0) : 0);
+  function xPlan() {
+    const g = xGrid();
+    const c = X.countFrames(xPayloadLen(), g.W, g.H, X_BITS[xs.colours], GECC[xs.ecc], xs.extra);
+    return c ? { ...c, g } : null;
+  }
+  function pressed(group, attr, value) {
+    for (const b of $(group).querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset[attr] === String(value)));
+  }
+  function renderExport() {
+    if (!prepared) return;
+    $('xFile').textContent = prepared.file.name + ' · ' + fmtBytes(prepared.payload.length);
+    pressed('xFormat', 'f', xs.format);
+    pressed('xPage', 'p', xs.page);
+    pressed('xShape', 's', xs.shape);
+    pressed('xColours', 'c', xs.colours);
+    pressed('xEcc', 'e', xs.ecc);
+    pressed('xExtra', 'x2', xs.extra);
+    for (const r of $('xBody').querySelectorAll('[data-x]')) r.hidden = !r.dataset.x.split(' ').includes(xs.format);
+    $('xFps').textContent = `${xs.fps} frames a second`;
+    $('xFormatNote').textContent = {
+      pdf: 'One code per page. Print it, then scan the pages with Receive, or photograph them and use Import.',
+      png: 'One image per code, in a ZIP. Show them on any screen, or send them to someone with Beam.',
+      html: 'One page that plays the codes in a loop. Open it on any computer or TV, in full screen.',
+    }[xs.format];
+    const plan = xPlan();
+    const box = $('xCountBox');
+    if (!plan) {
+      $('xDens').textContent = String(xs.dens);
+      $('xCount').textContent = '–'; $('xCountL').textContent = '';
+      $('xCountNote').textContent = 'These settings don’t fit. Choose a higher density.';
+      box.classList.add('bad');
+      $('xGo').disabled = true;
+      return;
+    }
+    const { L, n, need, g } = plan;
+    $('xDens').textContent = `${xs.dens}: ${L.W} × ${L.H} squares`;
+    const q = X.quietFor(L);
+    if (xs.format === 'pdf') {
+      const mm = (Math.min(g.page.aw / (L.W + 2 * q), g.page.ah / (L.H + 2 * q)) * 25.4) / 72;
+      $('xDensNote').textContent = `Squares ${mm.toFixed(2)} mm on paper. ` + (mm >= 0.95
+        ? 'Reads live with a phone camera, or from photos.'
+        : mm >= 0.65
+          ? 'Too small for a live HD camera: photograph the pages and use Import (or receive with a 4K camera).'
+          : 'Very small: only sharp, close photos read it. Test one page before printing many.');
+      $('xColNote').textContent = { 2: 'Black and white: for any printer, the most robust.', 4: 'Prints with the cyan, magenta, yellow and black inks. Needs a colour printer.', 8: 'The most data per page, but needs a good colour printer and even light.' }[xs.colours];
+    } else {
+      $('xDensNote').textContent = 'Use what reads well from your sender screen. Same as Send works.';
+      $('xColNote').textContent = { 2: 'Black and white: the most robust.', 4: 'The usual choice.', 8: 'The most data, needs a sharp camera close up.' }[xs.colours];
+    }
+    const unit = { pdf: ['page', 'pages'], png: ['image', 'images'], html: ['frame', 'frames'] }[xs.format];
+    $('xExtraNote').textContent = xs.extra
+      ? `Extra repair pieces: any ${need} of the ${n} ${unit[1]} rebuild the file, so some can be lost, torn or unreadable.`
+      : `No spare: every ${unit[0]} must be read.`;
+    const per = (L.blocks.length * C.BLOCK) / 1024;
+    const est = ((L.W * L.H * L.bits) / 8) * { pdf: 2.0, png: 2.7, html: 1.4 }[xs.format] * n + (xs.format === 'html' ? 6000 : 2000);
+    $('xCount').textContent = n.toLocaleString();
+    $('xCountL').textContent = n === 1 ? unit[0] : unit[1];
+    let note = `${per.toFixed(1)} KB of the file per ${unit[0]}. ` + (n > 1 ? `Any ${need} are enough. ` : '');
+    if (xs.format === 'html') note += `Loops every ${fmtTime(n / xs.fps)} at ${xs.fps} a second. `;
+    note += `About ${fmtBytes(est)}.`;
+    const many = xs.format === 'pdf' ? n > 40 : n > 400;
+    if (many) note += xs.format === 'pdf' ? ' That’s a lot of paper: raise the density or colours, lower the spare pieces, or reduce the file first.' : ' That’s a lot of frames: raise the density or colours.';
+    $('xCountNote').textContent = note;
+    box.classList.toggle('bad', many);
+    $('xGo').disabled = !!xJob;
+    if (!xJob) $('xGo').textContent = `Export ${n.toLocaleString()} ${n === 1 ? unit[0] : unit[1]}`;
+  }
+  function xDoneUi(done) {
+    if (done) return;
+    $('xProg').hidden = true;
+    $('xCancel').textContent = 'Cancel';
+    $('xShare').hidden = true;
+    $('xBtns').classList.remove('three');
+  }
+  // one line on the home card: how many pages or images this file makes at the current export settings
+  function xSummary() {
+    const el = $('xSum');
+    const plan = prepared && xPlan();
+    el.hidden = !plan;
+    if (!plan) return;
+    const what = { pdf: ['printed page', 'printed pages'], png: ['image', 'images'], html: ['slideshow frame', 'slideshow frames'] }[xs.format];
+    el.innerHTML = `This file: <b>${plan.n.toLocaleString()} ${plan.n === 1 ? what[0] : what[1]}</b> at density ${xs.dens}, ${xs.colours} colours. Change it in Export.`;
+  }
+  function openExport() {
+    if (!prepared) return;
+    xJob = null;
+    xDoneUi(false);
+    $('xDlg').hidden = false;
+    setPassword(password);
+    renderExport();
+  }
+  function closeExport() {
+    if (xJob) xJob.cancelled = true;
+    xJob = null;
+    $('xDlg').hidden = true;
+    xSummary();
+  }
+  // Settings can change unless an export is running; changing them after one finished starts a new one.
+  function xEditable() {
+    if (xJob && !xJob.blob) return false;
+    if (xJob) { xJob = null; xDoneUi(false); }
+    return true;
+  }
+  function xSet(key, value) {
+    if (!xEditable()) return;
+    xs[key] = value;
+    renderExport();
+  }
+  $('exportBtn').addEventListener('click', openExport);
+  $('xCancel').addEventListener('click', closeExport);
+  $('xFormat').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-f]');
+    if (!b || b.dataset.f === xs.format || !xEditable()) return;
+    xKeep(); // each format remembers its own settings, and starts from its suggestion
+    xs.format = b.dataset.f;
+    xLoad(xs.format);
+    renderExport();
+  });
+  $('xPage').addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b) xSet('page', b.dataset.p); });
+  $('xShape').addEventListener('click', (e) => { const b = e.target.closest('[data-s]'); if (b) xSet('shape', b.dataset.s); });
+  $('xColours').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (b) xSet('colours', Number(b.dataset.c)); });
+  $('xEcc').addEventListener('click', (e) => { const b = e.target.closest('[data-e]'); if (b) xSet('ecc', b.dataset.e); });
+  $('xExtra').addEventListener('click', (e) => { const b = e.target.closest('[data-x2]'); if (b) xSet('extra', Number(b.dataset.x2)); });
+  document.querySelectorAll('[data-xstep]').forEach((b) => b.addEventListener('click', () => {
+    const d = Number(b.dataset.d);
+    if (b.dataset.xstep === 'dens') {
+      const i = G.PRESETS.indexOf(xs.dens);
+      xSet('dens', G.PRESETS[Math.max(0, Math.min(G.PRESETS.length - 1, i + d))]);
+    } else xSet('fps', Math.max(1, Math.min(60, xs.fps + d)));
+  }));
+  $('xSuggest').addEventListener('click', () => { if (xEditable()) { Object.assign(xs, X_SUGGEST[xs.format]); renderExport(); } });
+  $('xSender').addEventListener('click', () => {
+    if (!xEditable()) return;
+    Object.assign(xs, { dens: G.PRESETS.includes(prefs.gDensity) ? prefs.gDensity : 288, colours: prefs.gColours, ecc: prefs.gEcc, fps: prefs.gfps });
+    renderExport();
+  });
+  function saveBlob(blob, name) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 120000);
+  }
+  const stem = (name) => (String(name).replace(/\.[^.]+$/, '').replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'file');
+  const short = (name) => (name.length > 40 ? name.slice(0, 37) + '...' : name);
+  async function runExport() {
+    if (!prepared || xJob) return;
+    const plan0 = xPlan();
+    if (!plan0) return;
+    const job = { cancelled: false };
+    xJob = job;
+    $('xGo').disabled = true;
+    $('xGo').textContent = 'Exporting…';
+    $('xProg').hidden = false;
+    $('xBar').style.width = '0%';
+    const at = (i, n) => { $('xBar').style.width = ((i / n) * 100).toFixed(1) + '%'; };
+    const yieldUi = () => new Promise((r) => setTimeout(r, 0));
+    try {
+      const payload = await protectedPayload();
+      const g = xGrid();
+      const plan = X.exportPlan(payload, g.W, g.H, X_BITS[xs.colours], GECC[xs.ecc], xs.extra);
+      const { L, n, need } = plan;
+      const q = X.quietFor(L);
+      const label = password ? 'protected file' : short(prepared.file.name);
+      const base = password ? 'beam-protected' : 'beam-' + stem(prepared.file.name);
+      const pad = (i) => String(i).padStart(String(n).length, '0');
+      let blob, name;
+      if (xs.format === 'pdf') {
+        const k = Math.max(3, Math.round(1600 / (Math.max(L.W, L.H) + 2 * q)));
+        blob = await X.pdf(n, async (i) => ({
+          img: X.compose(L, plan.next(), q, k), palette: L.table,
+          caption: `Beam · ${label} · page ${i + 1} of ${n}` + (need < n ? ` · any ${need} will do` : '') + ' · scan with psbarik13.github.io/beam',
+        }), xs.page, async (i) => { at(i, n); await yieldUi(); return !job.cancelled; });
+        name = base + '.pdf';
+      } else if (xs.format === 'png') {
+        const k = Math.max(1, Math.round(1920 / (Math.max(L.W, L.H) + 2 * q)));
+        const files = [];
+        for (let i = 0; i < n; i++) {
+          files.push({ name: `${base}-${pad(i + 1)}-of-${n}.png`, data: await X.png(X.compose(L, plan.next(), q, k), L.table) });
+          at(i + 1, n);
+          await yieldUi();
+          if (job.cancelled) throw new Error('cancelled');
+        }
+        job.files = files;
+        blob = new Blob([X.zip(files)], { type: 'application/zip' });
+        name = base + '-images.zip';
+      } else {
+        const frames = [];
+        for (let i = 0; i < n; i++) {
+          frames.push(await X.png(X.compose(L, plan.next(), q, 1), L.table));
+          at(i + 1, n);
+          if (i % 4 === 3) await yieldUi();
+          if (job.cancelled) throw new Error('cancelled');
+        }
+        const html = X.slideshow(frames, { title: `Beam · ${label}`, fps: xs.fps, note: label + (need < n ? ` · any ${need} of ${n} frames will do` : '') });
+        blob = new Blob([html], { type: 'text/html' });
+        name = base + '-slideshow.html';
+      }
+      if (job.cancelled) return;
+      xKeep();
+      prefs.x = { format: xs.format, page: xs.page, shape: xs.shape };
+      prefs.xf = { ...xf };
+      savePrefs();
+      job.blob = blob;
+      job.name = name;
+      saveBlob(blob, name);
+      at(1, 1);
+      $('xCountNote').textContent = `Exported ${name} (${fmtBytes(blob.size)}). If it didn’t download, tap Save.` + (password ? ' It is protected: the receiver needs the password.' : '');
+      $('xGo').disabled = false;
+      $('xGo').textContent = 'Save';
+      $('xCancel').textContent = 'Done';
+      // phones: share the images themselves (so they can go to the photo library), or the file
+      const share = job.files && job.files.length <= 100 ? job.files.map((f) => new File([f.data], f.name, { type: 'image/png' })) : [new File([blob], name, { type: blob.type })];
+      try { if (navigator.canShare && navigator.canShare({ files: share })) job.share = share; } catch (e) {}
+      $('xShare').hidden = !job.share;
+      $('xBtns').classList.toggle('three', !!job.share);
+    } catch (e) {
+      if (job.cancelled) return;
+      xJob = null;
+      $('xProg').hidden = true;
+      toast('Export failed. ' + ((e && e.message) || ''));
+      renderExport();
+    }
+  }
+  $('xGo').addEventListener('click', () => {
+    const job = xJob;
+    if (job && job.blob) { saveBlob(job.blob, job.name); return; }
+    runExport();
+  });
+  $('xShare').addEventListener('click', () => {
+    const job = xJob;
+    if (job && job.share) navigator.share({ files: job.share, title: job.name }).catch(() => {});
+  });
+
+  // ------------------------------------------------------------ import
+  // Exported files (PDF, ZIP of images, slideshow page) or any photos or screenshots of codes: each image goes
+  // through a fresh grid reader, and the pieces into the same assembler as a live transfer.
+  let imp = null;
+  function impLog(text, bad) {
+    const li = document.createElement('li');
+    li.textContent = text;
+    if (bad) li.className = 'bad';
+    const log = $('impLog');
+    log.prepend(li);
+    while (log.children.length > 200) log.lastChild.remove();
+  }
+  function impStatus() {
+    if (!imp) return;
+    const p = imp.K ? imp.rank / imp.K : 0;
+    $('impBar').style.width = (p * 100).toFixed(1) + '%';
+    const what = `${imp.images} ${imp.images === 1 ? 'image' : 'images'} read`;
+    if (imp.running) $('impStat').innerHTML = `<b>${Math.floor(p * 100)}%</b> of the file · ${what} · reading…`;
+    else if (imp.K) $('impStat').innerHTML = `<b>${Math.floor(p * 100)}%</b> of the file · ${what}`;
+    else $('impStat').textContent = imp.images ? `No Beam codes found yet (${what}).` : 'Reading…';
+    $('impHint').textContent = imp.running ? ''
+      : imp.K ? 'Not enough yet. Add more pages or images (any you haven’t added).'
+        : 'Add Beam’s exported PDF, images or slideshow, or photos of the printed pages.';
+  }
+  function closeImport() {
+    if (imp) { imp.cancelled = true; imp.asm.terminate(); imp.worker.terminate(); }
+    imp = null;
+    $('impDlg').hidden = true;
+  }
+  function startImport(list) {
+    const files = [...list];
+    if (!files.length) return;
+    if (!imp) {
+      let asm, worker;
+      try { asm = makeAssembler(); worker = makeGridWorker(); } catch (e) { toast('Beam could not start its background worker.'); return; }
+      imp = { asm, worker, queue: [], images: 0, rank: 0, K: 0, id: null, running: false, done: false, cancelled: false, t0: performance.now() };
+      asm.onmessage = onImportAsm;
+      $('impLog').innerHTML = '';
+      $('impSub').textContent = '';
+      $('impDlg').hidden = false;
+    }
+    imp.queue.push(...files);
+    impStatus();
+    if (!imp.running) runImport(imp);
+  }
+  function onImportAsm(e) {
+    const me = imp;
+    if (!me) return;
+    const m = e.data;
+    if (m.type === 'progress') {
+      if (m.results.some((r) => r && r.newTransfer) && me.id != null && m.id !== me.id) impLog('These codes are from a different export. Started over with them.', true);
+      if (m.id != null) me.id = m.id;
+      me.rank = m.rank; me.K = m.K;
+      impStatus();
+      return;
+    }
+    if (m.type === 'file' || m.type === 'locked') {
+      me.done = true;
+      const ctx = { secs: (performance.now() - me.t0) / 1000, imported: me.images, K: m.K, received: m.received };
+      closeImport();
+      if (m.type === 'file') deliver(m, ctx);
+      else unlock(new Uint8Array(m.buf), ctx);
+      return;
+    }
+    if (m.type === 'error') { me.done = true; closeImport(); toast('Could not rebuild the file: ' + m.message); }
+  }
+  const isImageName = (n) => /\.(png|jpe?g|webp|gif|bmp|avif|heic|heif)$/i.test(n);
+  async function expand(f) {
+    const name = f.name || 'image';
+    const head = new Uint8Array(await f.slice(0, 5).arrayBuffer());
+    const sig = String.fromCharCode(...head);
+    if (sig === '%PDF-') {
+      const list = await X.pdfImages(new Uint8Array(await f.arrayBuffer()));
+      return list.map((d, i) => ({ ...d, label: `${name}, page ${i + 1}` }));
+    }
+    if (head[0] === 0x50 && head[1] === 0x4b && head[2] === 3 && head[3] === 4) {
+      const entries = (await X.unzip(new Uint8Array(await f.arrayBuffer()))).filter((x) => isImageName(x.name) && !/(^|\/)(__MACOSX|\.)/.test(x.name));
+      entries.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      return entries.map((x) => ({ bytes: x.data, label: x.name.split('/').pop() }));
+    }
+    if (/\.html?$/i.test(name) || f.type === 'text/html') {
+      const urls = X.slideshowImages(await f.text());
+      return urls.map((u, i) => ({ url: u, label: `${name}, frame ${i + 1}` }));
+    }
+    return [{ blob: f, label: name }];
+  }
+  function upscaleRGBA(img, k) {
+    const w = img.w * k, h = img.h * k, rgba = new Uint8ClampedArray(w * h * 4);
+    const src = new Uint32Array(img.rgba.buffer, img.rgba.byteOffset, img.w * img.h), dst = new Uint32Array(rgba.buffer);
+    for (let y = 0; y < h; y++) {
+      const sy = ((y / k) | 0) * img.w, o = y * w;
+      for (let x = 0; x < w; x++) dst[o + x] = src[sy + ((x / k) | 0)];
+    }
+    return { w, h, rgba };
+  }
+  // Small images (1 pixel per square) are enlarged so every square has pixels to spare; huge photos are shrunk.
+  const MIN_SIDE = 1200, MAX_SIDE = 4096;
+  function fitPixels(img) {
+    const long = Math.max(img.w, img.h);
+    if (long < MIN_SIDE) return upscaleRGBA(img, Math.ceil(MIN_SIDE / long));
+    return img;
+  }
+  async function bitmapPixels(blob) {
+    const bm = await createImageBitmap(blob);
+    const long = Math.max(bm.width, bm.height);
+    const s = long > MAX_SIDE ? MAX_SIDE / long : long < MIN_SIDE ? Math.ceil(MIN_SIDE / long) : 1;
+    const w = Math.max(1, Math.round(bm.width * s)), h = Math.max(1, Math.round(bm.height * s));
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const cx = c.getContext('2d', { willReadFrequently: true });
+    cx.imageSmoothingEnabled = s < 1;
+    cx.imageSmoothingQuality = 'high';
+    cx.drawImage(bm, 0, 0, w, h);
+    if (bm.close) bm.close();
+    const rgba = cx.getImageData(0, 0, w, h).data;
+    c.width = c.height = 0;
+    return { w, h, rgba };
+  }
+  function dataUrlBytes(u) {
+    const b = atob(u.slice(u.indexOf(',') + 1));
+    const out = new Uint8Array(b.length);
+    for (let i = 0; i < b.length; i++) out[i] = b.charCodeAt(i);
+    return out;
+  }
+  async function toPixels(src) {
+    if (src.load) {
+      const img = { w: src.w, h: src.h, rgba: await src.load() };
+      return Math.max(img.w, img.h) > MAX_SIDE ? bitmapPixels(await imageBlob(img)) : fitPixels(img);
+    }
+    const bytes = src.url ? dataUrlBytes(src.url) : src.bytes;
+    if (bytes) {
+      const own = await X.readPng(bytes).catch(() => null); // Beam's own PNGs: exact pixels, no smoothing
+      if (own && Math.max(own.w, own.h) <= MAX_SIDE) return fitPixels(own);
+    }
+    return bitmapPixels(src.blob || new Blob([src.jpeg || bytes]));
+  }
+  async function imageBlob(img) {
+    const c = document.createElement('canvas');
+    c.width = img.w; c.height = img.h;
+    c.getContext('2d').putImageData(new ImageData(img.rgba, img.w, img.h), 0, 0);
+    const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+    c.width = c.height = 0;
+    return blob;
+  }
+  function decodeStill(me, img) {
+    return new Promise((resolve) => {
+      me.worker.onmessage = (e) => { if (e.data.type === 'result') resolve(e.data); };
+      me.worker.postMessage({ type: 'reset' });
+      me.worker.postMessage({ type: 'decode', buf: img.rgba.buffer, w: img.w, h: img.h }, [img.rgba.buffer]);
+    });
+  }
+  async function runImport(me) {
+    me.running = true;
+    impStatus();
+    while (me.queue.length && !me.done && !me.cancelled) {
+      const f = me.queue.shift();
+      let sources;
+      try {
+        sources = await expand(f);
+      } catch (e) {
+        impLog(`${f.name}: could not read it. ${(e && e.message) || ''}`, true);
+        continue;
+      }
+      if (!sources.length) { impLog(`${f.name}: no images found in it.`, true); continue; }
+      for (const src of sources) {
+        if (me.done || me.cancelled) break;
+        $('impSub').textContent = src.label;
+        let img;
+        try {
+          img = await toPixels(src);
+        } catch (e) {
+          impLog(`${src.label}: this browser can’t open this image.`, true);
+          continue;
+        }
+        if (me.done || me.cancelled) break;
+        const r = await decodeStill(me, img);
+        if (me.cancelled) break;
+        me.images++;
+        const info = r.info || {};
+        const got = r.packets ? r.packets.length : 0;
+        if (got) me.asm.postMessage({ type: 'packets', packets: r.packets }, r.packets);
+        if (got) impLog(`${src.label}: ${got} ${got === 1 ? 'block' : 'blocks'} read` + (info.failed ? `, ${info.failed} unreadable` : '') + '.', false);
+        else impLog(`${src.label}: ${info.anchors >= 3 ? 'found a code, but could not read it. Try a sharper, closer photo with even light.' : 'no Beam code found. All four corner squares must be in the picture.'}`, true);
+        impStatus();
+      }
+    }
+    me.running = false;
+    if (!me.done && !me.cancelled) { $('impSub').textContent = ''; impStatus(); }
+  }
+  $('importFile').addEventListener('change', (e) => { startImport(e.target.files); e.target.value = ''; });
+  $('impMoreFile').addEventListener('change', (e) => { startImport(e.target.files); e.target.value = ''; });
+  $('impCancel').addEventListener('click', closeImport);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!$('pwDlg').hidden) { pwJob = null; $('pwDlg').hidden = true; goHome(); }
+    else if (!$('xDlg').hidden) closeExport();
+    else if (!$('impDlg').hidden) closeImport();
+  });
+
   // initial UI state
+  setPassword('');
   prefs.fps = Math.min(60, Math.max(1, prefs.fps | 0));
   prefs.gfps = Math.min(60, Math.max(1, prefs.gfps | 0));
   if (![2, 4, 8].includes(prefs.gColours)) prefs.gColours = 4;
