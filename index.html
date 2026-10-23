@@ -7376,7 +7376,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     $('gdensity').max = G.PRESETS.length - 1;
     $('gdensity').value = di;
     $('gdensityVal').textContent = g
-      ? `${g.W}×${g.H} cells, ${g.cell} px each: ${fmtBytes(per * C.BLOCK)} per frame`
+      ? `Density ${prefs.gDensity}: ${g.W}×${g.H} cells, ${g.cell} px each, ${fmtBytes(per * C.BLOCK)} per frame`
       : 'Too dense for this screen. Lower the density or enlarge the window.';
     for (const b of $('gcolours').querySelectorAll('button')) b.setAttribute('aria-pressed', String(Number(b.dataset.colours) === prefs.gColours));
     $('gcoloursVal').textContent = COLOUR_NOTES[prefs.gColours] || '';
