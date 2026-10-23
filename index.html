@@ -197,7 +197,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
 /* Bottom sheet: the head (progress + Stop) always shows; swipe it up for stats and settings. */
 .rpanel {
   position: absolute; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 640px; max-height: 82%;
-  display: flex; flex-direction: column; background: rgba(10, 25, 41, 0.94); backdrop-filter: blur(8px);
+  display: flex; flex-direction: column; background: rgba(10, 25, 41, 0.96);
   border-radius: 18px 18px 0 0; box-shadow: 0 -8px 30px rgba(0,0,0,0.35);
   transform: translateY(calc(100% - var(--head-h) - var(--safe-b))); transition: transform .28s cubic-bezier(.2,.8,.3,1);
   will-change: transform;
@@ -6070,8 +6070,23 @@ pako/dist/pako.esm.mjs:
     }
     return fromDrawable(f, w, h);
   }
+  // A photo straight from the camera or a file: decoded here, off the page, shrunk to at most maxArea pixels;
+  // a small copy goes back for the page's photo map.
+  async function fromPhoto(m, extra) {
+    const bm = await createImageBitmap(m.blob);
+    const area = bm.width * bm.height, k = area > m.maxArea ? Math.sqrt(m.maxArea / area) : 1;
+    const w = Math.max(1, Math.round(bm.width * k)), h = Math.max(1, Math.round(bm.height * k));
+    const c = new OffscreenCanvas(w, h), cx = c.getContext('2d', { willReadFrequently: true });
+    cx.imageSmoothingQuality = 'high';
+    cx.drawImage(bm, 0, 0, w, h);
+    extra.thumb = await createImageBitmap(bm, { resizeWidth: m.thumbW, resizeHeight: Math.max(1, Math.round((m.thumbW * h) / w)) });
+    extra.w = w; extra.h = h;
+    bm.close();
+    return G.imageFromRGBA(cx.getImageData(0, 0, w, h).data, w, h);
+  }
   async function handle(m, viaPort) {
     const t = performance.now();
+    const extra = {};
     try {
       let img;
       if (m.type === 'frame') {
@@ -6083,6 +6098,9 @@ pako/dist/pako.esm.mjs:
         bm.close();
       } else if (m.type === 'decode') {
         img = G.imageFromRGBA(new Uint8ClampedArray(m.buf), m.w, m.h);
+      } else if (m.type === 'photo') {
+        if (typeof OffscreenCanvas !== 'function') { self.postMessage({ type: 'result', packets: [], info: {}, needPage: true }); return; }
+        img = await fromPhoto(m, extra);
       } else return;
       const r = dec.decodeImage(img);
       const packets = [];
@@ -6090,9 +6108,9 @@ pako/dist/pako.esm.mjs:
         const p = G.toPacket(b);
         if (p) packets.push(p.buffer);
       }
-      self.postMessage({ type: 'result', packets, info: r.info, ms: performance.now() - t, kind: img.kind }, packets);
+      self.postMessage({ type: 'result', packets, info: r.info, ms: performance.now() - t, kind: img.kind, ...extra }, extra.thumb ? [...packets, extra.thumb] : packets);
     } catch (err) {
-      self.postMessage({ type: 'result', packets: [], info: { error: String((err && err.message) || err) }, ms: performance.now() - t });
+      self.postMessage({ type: 'result', packets: [], info: { error: String((err && err.message) || err) }, ms: performance.now() - t, needPage: m.type === 'photo' });
     }
     if (viaPort && port) port.postMessage('idle');
   }
@@ -10681,14 +10699,20 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (!rx || rx.finished) return;
     rx.ovRaf = requestAnimationFrame(drawOverlay);
     const cv = $('overlay');
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
     const W = cv.clientWidth, H = cv.clientHeight;
-    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-    const c = cv.getContext('2d');
-    c.clearRect(0, 0, cv.width, cv.height);
+    let resized = false;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); resized = true; }
     const o = rx.ov, now = performance.now();
     const age = o ? now - o.t : Infinity;
-    $('reticle').classList.toggle('gone', age < 700);
+    const gone = age < 700, ret = $('reticle');
+    if (ret.classList.contains('gone') !== gone) ret.classList.toggle('gone', gone);
+    // nothing new: the canvas already shows it (full strength until 350 ms, then a fade)
+    if (!resized && (age > 700 ? rx.ovBlank : o === rx.ovShown && age < 350)) return;
+    const c = cv.getContext('2d');
+    c.clearRect(0, 0, cv.width, cv.height);
+    rx.ovBlank = age > 700;
+    rx.ovShown = o;
     if (age > 700) return;
     const size = o.kind === 'grid' ? o.info.size : o.size;
     if (!size) return;
@@ -10792,6 +10816,10 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     }
   }
 
+  // writes that skip unchanged values: every change costs the page a style and layout pass
+  const put = (id, v) => { const e = $(id); if (e.textContent !== v) e.textContent = v; };
+  const putH = (id, v) => { const e = $(id); if (e.__html !== v) { e.innerHTML = v; e.__html = v; } };
+  const putW = (id, v) => { const e = $(id); if (e.style.width !== v) e.style.width = v; };
   function updateRecvStats() {
     if (!rx || rx.finished) return;
     const now = performance.now();
@@ -10812,15 +10840,15 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       if (b[1] > a[1]) dropShare = (b[2] - a[2]) / (b[1] - a[1]);
     }
     const decFps = rx.decodedAt.length / Math.min(2, Math.max(0.5, (now - rx.camStart) / 1000));
-    $('rCam').textContent = Math.round(camFps) + ' fps';
-    $('rDec').textContent = Math.round(decFps) + '/s';
+    put('rCam', Math.round(camFps) + ' fps');
+    put('rDec', Math.round(decFps) + '/s');
     if (rx.track && rx.track.getSettings) {
       const st = rx.track.getSettings();
       const nReaders = rx.decoder ? rx.decoder.workers : 0;
       const gi = rx.mode === 'grid' && rx.gridInfo && rx.gridInfo.locked ? rx.gridInfo : null;
-      $('rCamInfo').textContent = `Camera ${st.width || '?'}×${st.height || '?'} at ${Math.round(st.frameRate || camFps)} fps, ${nReaders} ${nReaders === 1 ? 'reader' : 'readers in parallel'} (${rx.decoder ? rx.decoder.name : ''}).` +
+      put('rCamInfo', `Camera ${st.width || '?'}×${st.height || '?'} at ${Math.round(st.frameRate || camFps)} fps, ${nReaders} ${nReaders === 1 ? 'reader' : 'readers in parallel'} (${rx.decoder ? rx.decoder.name : ''}).` +
         (rx.pump ? ` Frames go straight to the readers; ${Math.round(dropShare * 100)}% skipped while they were busy.` : '') +
-        (gi ? ` Grid ${gi.grid}, ${gi.colours} colours, ${gi.cellPx} camera px per square.` : '');
+        (gi ? ` Grid ${gi.grid}, ${gi.colours} colours, ${gi.cellPx} camera px per square.` : ''));
     }
     const r = rx.prog;
     const span = Math.min(W, now - (rx.startedAt || now)) / 1000;
@@ -10845,12 +10873,12 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     }
     rx.senderRate = senderRate;
     const grid = rx.mode === 'grid';
-    $('rReadsL').textContent = grid ? 'Blocks read' : 'Codes read';
-    $('rSenderL').textContent = grid ? 'Sender frames' : 'Sender';
-    $('rReads').textContent = readsPerSec.toFixed(readsPerSec >= 100 ? 0 : 1) + '/s';
-    $('rCaught').textContent = caught == null ? '–' : Math.round(caught * 100) + '%';
+    put('rReadsL', grid ? 'Blocks read' : 'Codes read');
+    put('rSenderL', grid ? 'Sender frames' : 'Sender');
+    put('rReads', readsPerSec.toFixed(readsPerSec >= 100 ? 0 : 1) + '/s');
+    put('rCaught', caught == null ? '–' : Math.round(caught * 100) + '%');
     const tl = rx.tiles || 1;
-    $('rSender').textContent = senderRate == null ? '–' : (senderRate / tl).toFixed(1) + '/s';
+    put('rSender', senderRate == null ? '–' : (senderRate / tl).toFixed(1) + '/s');
     $('reticle').classList.toggle('wide', tl > 1 || grid);
     const ms = rx.decodeMs.length ? rx.decodeMs.reduce((a, b) => a + b, 0) / rx.decodeMs.length : 0;
     const gl = rx.gridLog;
@@ -10864,18 +10892,18 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
 
     if (r.id != null && r.K) {
       const p = r.rank / r.K;
-      $('rBar').style.width = (p * 100).toFixed(1) + '%';
-      $('rPct').textContent = Math.floor(p * 100) + '%';
+      putW('rBar', (p * 100).toFixed(1) + '%');
+      put('rPct', Math.floor(p * 100) + '%');
       const have = Math.min(r.total, r.rank * r.block);
-      $('rAmt').innerHTML = `<b>${fmtBytes(have)}</b> of ${fmtBytes(r.total)}`;
+      putH('rAmt', `<b>${fmtBytes(have)}</b> of ${fmtBytes(r.total)}`);
       const innovCount = rx.innov.reduce((n, x) => n + x[1], 0);
       const innovSpan = Math.min(6, (now - rx.startedAt) / 1000);
       const innovRate = innovSpan > 1 ? innovCount / innovSpan : 0;
-      $('rEta').textContent = innovRate > 0 ? fmtTime((r.K - r.rank) / innovRate) + ' left' : '';
+      put('rEta', innovRate > 0 ? fmtTime((r.K - r.rank) / innovRate) + ' left' : '');
     }
 
-    const hint = $('rHint');
-    hint.classList.remove('ok');
+    // the hint is worked out here and written once at the end
+    const hint = { textContent: '', ok: false, classList: { add() { hint.ok = true; }, contains() { return hint.ok; } } };
     const gridReader = rx.decoder && (rx.decoder instanceof GridReader || rx.decoder instanceof AutoReader);
     const blockRate = gOk + gFail ? gOk / (gOk + gFail) : 1;
     const A = gridReader ? assistCamera(now, gi, gOk, gFail) : null;
@@ -10932,10 +10960,12 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     }
     const sweeping = rx.sweepAt && now - rx.sweepAt < 3000;
     const status = r.id != null ? `Receiving ${fmtBytes(r.total)}. ${sweeping ? 'Keep the camera steady as you move it.' : 'Keep both screens steady.'}` : 'Point the camera at the code: on a screen or on paper.';
-    $('rMsg').textContent = hint.textContent && !hint.classList.contains('ok') ? hint.textContent : status;
+    put('rHint', hint.textContent);
+    if ($('rHint').classList.contains('ok') !== hint.ok) $('rHint').classList.toggle('ok', hint.ok);
+    put('rMsg', hint.textContent && !hint.ok ? hint.textContent : status);
     const zc = rx.zoomCaps, zChip = $('zChip');
     zChip.hidden = !zc || Math.abs(zc.cur - zc.base) < 0.05;
-    if (!zChip.hidden) zChip.textContent = `${(zc.cur / zc.base).toFixed(1)}× zoom · Reset`;
+    if (!zChip.hidden) put('zChip', `${(zc.cur / zc.base).toFixed(1)}× zoom · Reset`);
     const m = rx.cmap;
     const still = m && (senderRate == null || senderRate < 2 * m.per); // a page or a still image, not a live sender
     const parts = (rx.sweepAt && now - rx.sweepAt < 5000) || (A && A.struggling) || (rx.zoomCaps && rx.zoomCaps.auto);
@@ -11123,31 +11153,40 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     markPhotoBtn(true);
     const t0 = performance.now();
     try {
-      const bm = await createImageBitmap(blob);
-      const area = bm.width * bm.height, k = area > PHOTO_AREA ? Math.sqrt(PHOTO_AREA / area) : 1;
-      const w = Math.round(bm.width * k), h = Math.round(bm.height * k);
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      const cx = c.getContext('2d', { willReadFrequently: true });
-      cx.imageSmoothingQuality = 'high';
-      cx.drawImage(bm, 0, 0, w, h);
-      const thumb = document.createElement('canvas');
-      thumb.width = 300; thumb.height = Math.max(1, Math.round((300 * h) / w));
-      thumb.getContext('2d').drawImage(bm, 0, 0, thumb.width, thumb.height);
-      if (bm.close) bm.close();
-      const rgba = cx.getImageData(0, 0, w, h).data;
-      c.width = c.height = 0;
       if (!me.stillW) me.stillW = makeGridWorker();
-      const r = await new Promise((resolve) => {
+      const call = (msg, transfer) => new Promise((resolve) => {
         me.stillW.onmessage = (e) => { if (e.data.type === 'result') resolve(e.data); };
         me.stillW.postMessage({ type: 'reset', still: true });
-        me.stillW.postMessage({ type: 'decode', buf: rgba.buffer, w, h }, [rgba.buffer]);
+        me.stillW.postMessage(msg, transfer || []);
       });
+      // the worker opens the photo (a 12 MP photo is 48 MB of pixels: too much work for the page while the camera runs)
+      let r = await call({ type: 'photo', blob, maxArea: PHOTO_AREA, thumbW: 300 });
+      let thumb = r.thumb, w = r.w;
+      if (r.needPage) {
+        // older browsers without canvases in workers: open it here
+        const bm = await createImageBitmap(blob);
+        const area = bm.width * bm.height, k = area > PHOTO_AREA ? Math.sqrt(PHOTO_AREA / area) : 1;
+        w = Math.round(bm.width * k);
+        const h = Math.round(bm.height * k);
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const cx = c.getContext('2d', { willReadFrequently: true });
+        cx.imageSmoothingQuality = 'high';
+        cx.drawImage(bm, 0, 0, w, h);
+        thumb = document.createElement('canvas');
+        thumb.width = 300; thumb.height = Math.max(1, Math.round((300 * h) / w));
+        thumb.getContext('2d').drawImage(bm, 0, 0, thumb.width, thumb.height);
+        if (bm.close) bm.close();
+        const rgba = cx.getImageData(0, 0, w, h).data;
+        c.width = c.height = 0;
+        r = await call({ type: 'decode', buf: rgba.buffer, w, h }, [rgba.buffer]);
+      }
       if (rx !== me || me.finished) return;
       const got = r.packets ? r.packets.length : 0;
       if (got && !me.photoStart) me.photoStart = t0;
       if (got) me.asm.postMessage({ type: 'packets', packets: r.packets }, r.packets);
-      if (!auto || !me.photoCardOff) showPhotoMap(thumb, w, r.info || {}, got);
+      if (thumb && (!auto || !me.photoCardOff)) showPhotoMap(thumb, w, r.info || {}, got);
+      if (thumb && thumb.close && thumb instanceof ImageBitmap) setTimeout(() => thumb.close(), 0);
     } catch (e) {
       if (!auto && rx === me) toast('Could not read that photo.');
     } finally {
