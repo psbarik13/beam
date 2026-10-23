@@ -11618,8 +11618,9 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (xs.format === 'pdf') {
       const mm = (Math.min(g.page.tw / (L.W + 2 * q), g.page.th / (L.H + 2 * q)) * 25.4) / 72;
       const few = xs.colours === 2;
-      // a 12 MP phone photo of a whole page gives about 12.4 pixels per mm; sharp photos read squares of 4.7 pixels
-      const shots = Math.ceil((4.7 / (12.4 * mm)) ** 2 - 0.15);
+      // a 12 MP phone photo of a whole page gives about 12.4 pixels per mm. Measured on simulated photos: squares of
+      // 4.4 pixels read almost every block of a 4-code page; a 9-code page loses more at its many code edges
+      const shots = Math.ceil(((T >= 9 ? 4.8 : 4.3) / (12.4 * mm)) ** 2 - 0.15);
       const photoTip = mm < 0.3 ? '' : shots <= 1 ? ' One phone photo reads a whole page: Receive, then Photo.' : ` Phone photos: about ${shots} per page, each of one part (Receive, then Photo).`;
       $('xDensNote').textContent = `Squares ${mm.toFixed(2)} mm on paper. ` + (mm >= 0.95
         ? (T > 1 ? 'Reads live with a phone camera: zoom in on one code at a time, or sweep across the page.' : 'Reads live with a phone camera, or from photos.')
