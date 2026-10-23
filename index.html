@@ -181,6 +181,8 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
 .cmap canvas { display: block; width: 100%; height: auto; border-radius: 6px; }
 .cmap p { margin: 6px 2px 0; font-size: 12.5px; line-height: 1.35; }
 .cmap p b { font-weight: 600; }
+/* zoom in use: shown on the camera view, one tap resets it */
+.zchip { position: absolute; left: 12px; top: calc(92px + var(--safe-t)); z-index: 2; border: 0; border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13.5px; font-weight: 600; background: rgba(232, 213, 162, 0.95); color: #14222e; box-shadow: 0 4px 14px rgba(0,0,0,0.35); cursor: pointer; }
 /* the last photo, as a map: green dots read, red dots not read */
 .pcard { position: absolute; left: 12px; bottom: calc(var(--head-h) + var(--safe-b) + 12px); width: min(46vw, 300px); background: rgba(10, 25, 41, 0.92); border-radius: 14px; padding: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 2; }
 .pcard canvas { display: block; width: 100%; height: auto; border-radius: 8px; background: #000; }
@@ -513,6 +515,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
   <canvas class="overlay" id="overlay" aria-hidden="true"></canvas>
   <div class="reticle" id="reticle"></div>
   <div class="rtop"><span class="msg" id="rMsg">Starting camera…</span></div>
+  <button class="zchip" id="zChip" type="button" hidden>Zoom · Reset</button>
   <div class="cmap" id="cMap" hidden><canvas id="cMapCv" width="210" height="120"></canvas><p id="cMapText"></p></div>
   <div class="pcard" id="pCard" hidden><canvas id="pCanvas" width="300" height="200"></canvas><p id="pText"></p><button class="pclose" id="pClose" type="button" aria-label="Hide the photo">×</button></div>
   <div class="rpanel" id="rpanel">
@@ -10876,11 +10879,9 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const gridReader = rx.decoder && (rx.decoder instanceof GridReader || rx.decoder instanceof AutoReader);
     const blockRate = gOk + gFail ? gOk / (gOk + gFail) : 1;
     const A = gridReader ? assistCamera(now, gi, gOk, gFail) : null;
-    const zoomedIn = rx.zoomCaps && rx.zoomCaps.auto && rx.zoomCaps.cur > rx.zoomCaps.base + 0.2;
-    if (zoomedIn && rx.sweepAt && now - rx.sweepAt < 3000) {
-      hint.textContent = `Zoomed in ${rx.zoomCaps.cur.toFixed(1)}×: reading the code part by part. Move slowly over the parts that are grey on the map.`;
-      hint.classList.add('ok');
-    } else if (A && A.struggling && now - A.since > 1000) {
+    if (A && A.offCentre) {
+      hint.textContent = 'The code is small and off to one side. Move it to the middle of the screen so Beam can zoom in on it, or hold the phone closer.';
+    } else if (A && A.struggling && now - A.since > 2000) {
       const px = gi.cellPx ? ` (${gi.cellPx} px)` : '';
       hint.textContent = photoSupported() && !A.noPhoto
         ? `The squares are too small for video${px}, so Beam takes full-resolution photos. Hold the phone still over the code.`
@@ -10932,6 +10933,9 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const sweeping = rx.sweepAt && now - rx.sweepAt < 3000;
     const status = r.id != null ? `Receiving ${fmtBytes(r.total)}. ${sweeping ? 'Keep the camera steady as you move it.' : 'Keep both screens steady.'}` : 'Point the camera at the code: on a screen or on paper.';
     $('rMsg').textContent = hint.textContent && !hint.classList.contains('ok') ? hint.textContent : status;
+    const zc = rx.zoomCaps, zChip = $('zChip');
+    zChip.hidden = !zc || Math.abs(zc.cur - zc.base) < 0.05;
+    if (!zChip.hidden) zChip.textContent = `${(zc.cur / zc.base).toFixed(1)}× zoom · Reset`;
     const m = rx.cmap;
     const still = m && (senderRate == null || senderRate < 2 * m.per); // a page or a still image, not a live sender
     const parts = (rx.sweepAt && now - rx.sweepAt < 5000) || (A && A.struggling) || (rx.zoomCaps && rx.zoomCaps.auto);
@@ -10947,6 +10951,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   // as a small map: green dots read, red dots not read, so it's clear where a closer photo is needed.
   const PHOTO_AREA = 16e6; // iPhone canvases stop at about 16.7 megapixels
   const photoSupported = () => typeof ImageCapture === 'function';
+  const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   // ---- the code map. A whole code in view gives its layout (from its corner squares and settings strip); every
   // block after that is placed by its sequence number: exports number their blocks in order, code by code, so
   // block i of code f has number f x (blocks per code) + i.
@@ -11019,29 +11024,48 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const fresh = gi && gi.size && now - (rx.gridAt || 0) < 1200;
     const seen = !!fresh && ((gi.sweep && gi.marks >= 4) || gi.anchors === 4);
     if (seen) A.lastSeen = now;
-    // only while nothing new arrives: sweep reading fails many blocks at the edge of view even when it reads well
+    // only while nothing new arrives, and only for squares measured too small (or corners found whose code can't
+    // be read): failures alone are usually focus, glare or movement, which neither zoom nor photos fix
     const moving = now - (rx.lastNew || -Infinity) < 2500;
     const small = gi.cellPx > 0 && gi.cellPx < (gi.locked ? 4.2 : 5.4);
-    const poor = gFail > 4 && gOk <= 0.3 * (gOk + gFail);
     const stuck = gi.anchors === 4 && !gi.locked; // corners found, but the grid inside can't be read
-    A.struggling = seen && !moving && (small || poor || stuck) && !rx.test;
+    A.struggling = seen && !moving && (small || stuck) && !rx.test;
     if (!A.struggling) A.since = 0; else if (!A.since) A.since = now;
+    A.offCentre = false;
     const z = rx.zoomCaps;
-    // back to the starting zoom once the code has been gone a while
-    if (z && z.auto && now - A.lastSeen > 4000) { setZoom(z.base); z.auto = false; }
-    if (!A.struggling || now - A.since < 1000) return A;
-    // 1. zoom in until the squares are big enough, even past the code's edges: then it reads part by part,
-    // and the code map shows which parts are still missing
-    if (z && now - A.zoomAt > 1500 && now - z.manualAt > 6000 && !rx.photoBusy) {
-      const want = gi.cellPx ? 5.5 / gi.cellPx : 2;
-      const next = Math.min(z.max, 4, Math.floor((z.cur * want) / z.step) * z.step);
+    if (z && z.auto) {
+      // back to the starting zoom once the code has gone, or when zooming in didn't bring anything new
+      if (now - A.lastSeen > 4000) { setZoom(z.base); z.auto = false; }
+      else if (now - A.zoomAt > 5000 && now - (rx.lastNew || -Infinity) > 5000) {
+        setZoom(z.base);
+        z.auto = false;
+        A.zoomBan = now + 30000;
+        toast('Zooming in didn’t help, so Beam zoomed back out. Hold the phone closer, or tap Photo.');
+      }
+    }
+    if (A.hi > 0 && now - A.hi > 6000 && now - (rx.lastNew || -Infinity) > 6000) { A.hi = -1; raiseResolution(false); } // 4K didn't help
+    if (!A.struggling || now - A.since < 2000) return A;
+    // 1. zoom in on the code. Only when its corner squares and settings strip were read (so the square size is
+    // measured, not guessed) and its squares are too small, and only as far as keeps the whole code in view: a
+    // phone camera zooms into the middle of the view, never into a corner. iPhones switch to the telephoto lens
+    // when zoomed in, which can't focus close, so they zoom 2x at most.
+    if (z && gi.locked && gi.quad && gi.cellPx && gi.cellPx < 3.8 && now > (A.zoomBan || 0) && now - A.zoomAt > 2500 && now - z.manualAt > 6000 && !rx.photoBusy) {
+      const [fw, fh] = gi.size, cx = fw / 2, cy = fh / 2, q = gi.quad;
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (let i = 0; i < 8; i += 2) { x0 = Math.min(x0, q[i]); x1 = Math.max(x1, q[i]); y0 = Math.min(y0, q[i + 1]); y1 = Math.max(y1, q[i + 1]); }
+      const fit = Math.min(cx / Math.max(1, cx - x0, x1 - cx), cy / Math.max(1, cy - y0, y1 - cy)) * 0.92;
+      const room = Math.min(fw / Math.max(1, x1 - x0), fh / Math.max(1, y1 - y0)) * 0.92; // if it were in the middle
+      const cap = Math.min(z.max, IOS ? z.base * 2 : z.base * 4);
+      const want = Math.min(5.5 / gi.cellPx, fit);
+      const next = Math.min(cap, Math.floor((z.cur * want) / z.step) * z.step);
       if (want > 1.15 && next > z.cur + z.step / 2) {
         setZoom(next);
         z.auto = true;
         A.zoomAt = now;
-        toast(`Zoomed in to ${next.toFixed(1)}× to see the squares. Move over the code part by part.`);
+        toast(`Zoomed in to ${(next / z.base).toFixed(1)}× on the code.`);
         return A;
       }
+      A.offCentre = room > 1.4 && fit < 1.15;
     }
     // 2. full-resolution photos, only when the video has read nothing at all for a while: taking a photo pauses
     // some cameras' video for a moment, which would only slow down a sweep that reads
@@ -11049,17 +11073,18 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       if (gOk === 0 && !rx.photoBusy && now - A.photoAt > 2500 && now - A.zoomAt > 800 && !(rx.sweepAt && now - rx.sweepAt < 4000)) { A.photoAt = now; takePhoto(); }
       return A;
     }
-    // 3. no photos in this browser: the sharpest video the camera has
-    if (!A.hi && prefs.camRes !== '4k') { A.hi = true; raiseResolution(); }
+    // 3. no photos in this browser (Safari, and every browser on iPhone): 4K video, but only for a code measured
+    // too small, and back to HD if it brings nothing new (4K frames are slower to read)
+    if (!A.hi && prefs.camRes !== '4k' && gi.locked && gi.cellPx && gi.cellPx < 3.8 && now - A.zoomAt > 3000) { A.hi = now; raiseResolution(true); }
     return A;
   }
-  async function raiseResolution() {
+  async function raiseResolution(up) {
     const t = rx && rx.track;
     const caps = (t && t.getCapabilities && t.getCapabilities()) || {};
     if (!t || !caps.width || caps.width.max < 2500) return;
     try {
-      await t.applyConstraints({ width: { ideal: 3840 }, height: { ideal: 2160 } });
-      toast('Raised the camera to its highest resolution to see the small squares.');
+      await t.applyConstraints(up ? { width: { ideal: 3840 }, height: { ideal: 2160 } } : { width: { ideal: 1920 }, height: { ideal: 1080 } });
+      if (up) toast('Switched the camera to 4K to see the small squares.');
     } catch {}
   }
   // after the phone's camera app was used (iPhone), the live camera may have stopped or stayed paused
@@ -11173,6 +11198,15 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (f && rx && !rx.finished) readPhoto(f, false);
   });
   $('pClose').addEventListener('click', () => { $('pCard').hidden = true; if (rx) rx.photoCardOff = true; });
+  $('zChip').addEventListener('click', () => {
+    const z = rx && rx.zoomCaps;
+    if (!z) return;
+    setZoom(z.base);
+    z.auto = false;
+    if (rx.assist) rx.assist.zoomBan = Infinity;
+    $('zChip').hidden = true;
+    toast('Zoom reset. Beam won’t zoom by itself again until you start receiving again.');
+  });
 
   // ---- speed test display on the receiver
   function renderTest({ now }) {
