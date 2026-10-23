@@ -120,6 +120,7 @@ a.btn { text-decoration: none; }
 .step:active { background: var(--field-3); }
 input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
 .seg { grid-column: 2 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.seg.seg5 { grid-template-columns: repeat(5, 1fr); }
 .seg button { height: 38px; border-radius: 10px; border: 0; background: var(--field-2); color: var(--on-field); font-weight: 600; }
 .seg button[aria-pressed=true] { background: var(--manila); color: #14222e; }
 .seg.seg2 { grid-template-columns: repeat(2, 1fr); }
@@ -282,6 +283,8 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
 .mnote { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
 .mnote:empty { display: none; }
 .seg-light.seg3l { grid-template-columns: repeat(3, 1fr); }
+.seg-light.seg5l { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 480px) { #xFormat { grid-template-columns: repeat(2, 1fr); } }
 .seg-light.seg2x2 { grid-template-columns: repeat(2, 1fr); }
 .stepper { display: grid; grid-template-columns: 44px 1fr 44px; gap: 6px; align-items: center; }
 .stepper button { height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 20px; line-height: 1; }
@@ -479,6 +482,13 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
       </div>
       <span class="val" id="geccVal"></span>
     </div>
+    <div class="ctl" data-for="grid">
+      <label>Codes on screen</label>
+      <div class="seg seg5" id="gslots" role="group" aria-label="Codes on screen">
+        <button type="button" data-slots="1">1</button><button type="button" data-slots="2">2</button><button type="button" data-slots="4">4</button><button type="button" data-slots="6">6</button><button type="button" data-slots="9">9</button>
+      </div>
+      <span class="val" id="gslotsVal"></span>
+    </div>
     <div class="ctl" data-for="qr">
       <label for="density">Density</label>
       <button class="step" type="button" data-step="density" data-d="-1" aria-label="Less dense">−</button>
@@ -605,8 +615,8 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     <div class="mhead"><b id="xTitle">Export</b><span id="xFile"></span></div>
     <div class="mbody" id="xBody">
       <div class="mrow"><span class="ml">Format</span>
-        <div class="seg-light seg3l" id="xFormat" role="group" aria-label="Format">
-          <button type="button" data-f="pdf">PDF to print</button><button type="button" data-f="png">Images</button><button type="button" data-f="html">Slideshow</button>
+        <div class="seg-light" id="xFormat" role="group" aria-label="Format">
+          <button type="button" data-f="pdf">PDF to print</button><button type="button" data-f="png">Images</button><button type="button" data-f="html">Slideshow</button><button type="button" data-f="gif">GIF</button>
         </div>
         <p class="mnote" id="xFormatNote"></p>
       </div>
@@ -621,7 +631,19 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
         </div>
         <p class="mnote" id="xTilesNote"></p>
       </div>
-      <div class="mrow" data-x="png html"><span class="ml">Shape</span>
+      <div class="mrow" data-x="gif"><span class="ml">GIF size</span>
+        <div class="seg-light seg3l" id="xGsize" role="group" aria-label="GIF size">
+          <button type="button" data-gs="960">960 px</button><button type="button" data-gs="1280">1280 px</button><button type="button" data-gs="1920">1920 px</button>
+        </div>
+        <p class="mnote" id="xGsizeNote"></p>
+      </div>
+      <div class="mrow" data-x="gif"><span class="ml">Codes per frame</span>
+        <div class="seg-light seg5l" id="xSlots" role="group" aria-label="Codes per frame">
+          <button type="button" data-sl="1">1</button><button type="button" data-sl="2">2</button><button type="button" data-sl="4">4</button><button type="button" data-sl="6">6</button><button type="button" data-sl="9">9</button>
+        </div>
+        <p class="mnote" id="xSlotsNote"></p>
+      </div>
+      <div class="mrow" data-x="png html gif"><span class="ml">Shape</span>
         <div class="seg-light seg3l" id="xShape" role="group" aria-label="Shape">
           <button type="button" data-s="wide">Wide 16:9</button><button type="button" data-s="tall">Tall 9:16</button><button type="button" data-s="square">Square</button>
         </div>
@@ -641,8 +663,9 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
         <div class="seg-light" id="xExtra" role="group" aria-label="Spare pieces"><button type="button" data-x2="0">None</button><button type="button" data-x2="0.1">10%</button><button type="button" data-x2="0.25">25%</button><button type="button" data-x2="0.5">50%</button></div>
         <p class="mnote" id="xExtraNote"></p>
       </div>
-      <div class="mrow" data-x="html"><span class="ml">Speed</span>
+      <div class="mrow" data-x="html gif"><span class="ml">Speed</span>
         <div class="stepper"><button type="button" data-xstep="fps" data-d="-1" aria-label="Slower">−</button><output id="xFps"></output><button type="button" data-xstep="fps" data-d="1" aria-label="Faster">+</button></div>
+        <p class="mnote" id="xFpsNote"></p>
       </div>
       <div class="mrow"><span class="ml">Password</span>
         <div class="pwrow"><input type="password" id="xPw" autocomplete="new-password" autocapitalize="off" spellcheck="false" placeholder="No password"><button type="button" id="xPwShow" aria-pressed="false">Show</button></div>
@@ -2552,6 +2575,9 @@ pako/dist/pako.esm.mjs:
     3: [[0, 0, 0], [255, 255, 255], [255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [0, 255, 255], [255, 0, 255]],
   };
   const PARITY = [24, 36, 54]; // error correction L, M, H: bytes of parity per 200-byte block
+  // An erasure retry leaves this many parity bytes unused, so a wrong guess is caught instead of "fixed" into a
+  // block that only the CRC-16 stands between: with 2 spare, about 1 failed block in 50,000 came out wrong.
+  const ERASURE_SPARE = 8;
   const ECC_NAMES = ['L', 'M', 'H'];
   const MARK = 6; // reserved square per block: outer ring of reference colours, white ring, 2x2 black centre
   // Version 3 whitens every block with the same sequence, so a block can be read without knowing where it sits
@@ -2727,6 +2753,74 @@ pako/dist/pako.esm.mjs:
     }
     const landscape = widthPx >= heightPx;
     return { W: landscape ? Lc : S, H: landscape ? S : Lc, cell, quiet, across: Lc };
+  }
+
+  /** Grid that fills a canvas with cells of a given size (device pixels): for codes side by side, each with
+      the same cell size as one code filling the whole screen at that density. */
+  function gridForCell(widthPx, heightPx, cell) {
+    const long = Math.max(widthPx, heightPx), short = Math.min(widthPx, heightPx);
+    let A = 2, Lc = 0, S = 0, quiet = 0;
+    for (let pass = 0; pass < 3; pass++) {
+      quiet = A + 1;
+      Lc = Math.min(1023, Math.floor(long / cell) - 2 * quiet);
+      S = Math.min(Lc, Math.floor(short / cell) - 2 * quiet);
+      const A2 = anchorModule(Lc, S);
+      if (A2 === A) break;
+      A = A2;
+    }
+    const landscape = widthPx >= heightPx, W = landscape ? Lc : S, H = landscape ? S : Lc;
+    // the config strip runs along the bottom: the width must hold it; the height only some rows of blocks
+    if (W < 16 * A + UNIT || H < 16 * A + 24) return null;
+    return { W, H, cell, quiet, across: Lc };
+  }
+
+  // Several codes side by side ("slots"): the arrangements tried for each count; the one carrying the most blocks wins.
+  const SLOT_ARRANGEMENTS = { 1: [[1, 1]], 2: [[2, 1], [1, 2]], 4: [[2, 2], [4, 1], [1, 4]], 6: [[3, 2], [2, 3]], 9: [[3, 3]] };
+  const SLOTS = [1, 2, 4, 6, 9];
+  /** k codes in a canvas (device pixels), each with the cell size one code would have there at density `across`.
+      -> { k, cols, rows, W, H, cell, quiet, L, blocks, cw, ch } (cw x ch: the whole picture in cells, quiet zones
+      included), or null if they don't fit. k = 1 is exactly gridFor. */
+  function slotGrid(widthPx, heightPx, across, k, bits, ecc) {
+    const one = gridFor(widthPx, heightPx, across);
+    if (!SLOT_ARRANGEMENTS[k] || k === 1) {
+      const L = layout(one.W, one.H, bits, ecc);
+      return L && L.blocks.length ? { k: 1, cols: 1, rows: 1, ...one, L, blocks: L.blocks.length, cw: one.W + 2 * one.quiet, ch: one.H + 2 * one.quiet } : null;
+    }
+    let best = null;
+    for (const [cols, rows] of SLOT_ARRANGEMENTS[k]) {
+      const g = gridForCell(Math.floor(widthPx / cols), Math.floor(heightPx / rows), one.cell);
+      const L = g && layout(g.W, g.H, bits, ecc);
+      if (!L || !L.blocks.length) continue;
+      const blocks = L.blocks.length * k;
+      if (!best || blocks > best.blocks) best = { k, cols, rows, ...g, L, blocks, cw: cols * (g.W + 2 * g.quiet), ch: rows * (g.H + 2 * g.quiet) };
+    }
+    return best;
+  }
+  /** The codes of one picture (colour indices, one per cell) side by side with their quiet zones: cw x ch cells. */
+  function composeSlots(sg, frames) {
+    const { L, cols, quiet: q, cw, ch } = sg, W = L.W, H = L.H, tw = W + 2 * q, th = H + 2 * q;
+    const out = new Uint8Array(cw * ch).fill(L.WHITE);
+    frames.forEach((idx, t) => {
+      const ox = (t % cols) * tw + q, oy = Math.floor(t / cols) * th + q;
+      for (let y = 0; y < H; y++) out.set(idx.subarray(y * W, (y + 1) * W), (oy + y) * cw + ox);
+    });
+    return out;
+  }
+
+  /** One sender picture as RGBA: job { W, H, bits, ecc, k, cols, quiet } (W x H one code), packets: k x blocks
+      fountain packets (ArrayBuffers or Uint8Arrays). One code: just the grid (the page adds the quiet zone);
+      several: all of them with their quiet zones. -> { px: Uint32Array, w, h } */
+  function slotPicture(job, packets, seed) {
+    const L = layout(job.W, job.H, job.bits, job.ecc);
+    if (!L) throw new Error('This grid does not fit the screen.');
+    const per = L.blocks.length, k = job.k || 1;
+    const frame = (t) => encodeFrame(L, L.blocks.map((_, i) => toBlock(new Uint8Array(packets[t * per + i]))), k === 1 ? seed : seed * 16 + t);
+    if (k === 1) return { px: toRGBA(L, frame(0)), w: L.W, h: L.H };
+    const q = job.quiet, cols = job.cols, rows = Math.ceil(k / cols);
+    const sg = { L, cols, quiet: q, cw: cols * (L.W + 2 * q), ch: rows * (L.H + 2 * q) };
+    const frames = [];
+    for (let t = 0; t < k; t++) frames.push(frame(t));
+    return { px: toRGBA(L, composeSlots(sg, frames)), w: sg.cw, h: sg.ch };
   }
 
   // ------------------------------------------------------------------ encoder
@@ -3010,7 +3104,7 @@ pako/dist/pako.esm.mjs:
   }
 
   /** Find the four corner anchors. With `hint` (last frame's anchors) only small windows around them are searched. */
-  function findAnchors(img, hint) {
+  function findAnchors(img, hint, keep) {
     const { w, h } = img;
     const f = w * h > 1.4e6 ? 2 : 1;
     if (hint) {
@@ -3029,8 +3123,69 @@ pako/dist/pako.esm.mjs:
         if (q) return q.map((c) => refineAnchor(img, c));
       }
     }
-    const q = pickFour(scanRegion(img, 0, 0, w, h, f));
+    const cands = scanRegion(img, 0, 0, w, h, f);
+    if (keep) { keep.cands = cands; keep.many = cands.filter((c) => c.count >= 2).length >= 8; } // maybe several codes
+    const q = pickFour(cands);
     return q ? q.map((c) => refineAnchor(img, c)) : null;
+  }
+  /** Every set of four anchor candidates that could be one code: similar size, a convex near-rectangle with no
+      other similar anchor inside it or along its sides. Clearest anchors first, then smallest. */
+  function codeQuads(cands) {
+    const P = cands.slice().sort((a, b) => b.count - a.count).slice(0, 40), n = P.length, out = [];
+    const order = (q) => {
+      const cx = (q[0].x + q[1].x + q[2].x + q[3].x) / 4, cy = (q[0].y + q[1].y + q[2].y + q[3].y) / 4;
+      return q.sort((p1, p2) => Math.atan2(p1.y - cy, p1.x - cx) - Math.atan2(p2.y - cy, p2.x - cx));
+    };
+    const similar = (a, b) => a.m < b.m * 1.3 && b.m < a.m * 1.3;
+    for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) {
+      if (!similar(P[a], P[b])) continue;
+      for (let c = b + 1; c < n; c++) {
+        if (!similar(P[a], P[c]) || !similar(P[b], P[c])) continue;
+        for (let d = c + 1; d < n; d++) {
+          if (!similar(P[a], P[d]) || !similar(P[b], P[d]) || !similar(P[c], P[d])) continue;
+          const q = order([P[a], P[b], P[c], P[d]]);
+          const m = Math.min(q[0].m, q[1].m, q[2].m, q[3].m);
+          const side = [0, 1, 2, 3].map((i) => Math.hypot(q[i].x - q[(i + 1) % 4].x, q[i].y - q[(i + 1) % 4].y));
+          // a code's anchors are at least 13 anchor modules apart; the gap between codes side by side is about 10
+          if (Math.min(...side) < 12 * m || Math.max(...side) > 6 * Math.min(...side)) continue;
+          if (side[0] > side[2] * 1.6 || side[2] > side[0] * 1.6 || side[1] > side[3] * 1.6 || side[3] > side[1] * 1.6) continue;
+          let square = true; // corners near right angles (a mild tilt at most)
+          for (let i = 0; i < 4 && square; i++) {
+            const p0 = q[(i + 3) % 4], p1 = q[i], p2 = q[(i + 1) % 4];
+            const cos = ((p0.x - p1.x) * (p2.x - p1.x) + (p0.y - p1.y) * (p2.y - p1.y)) / (side[(i + 3) % 4] * side[i]);
+            if (Math.abs(cos) > 0.3) square = false; // 72° to 108°
+          }
+          if (!square) continue;
+          let sign = 0, convex = true, area = 0;
+          for (let i = 0; i < 4; i++) {
+            const p0 = q[i], p1 = q[(i + 1) % 4], p2 = q[(i + 2) % 4];
+            area += p0.x * p1.y - p1.x * p0.y;
+            const cr = (p1.x - p0.x) * (p2.y - p1.y) - (p1.y - p0.y) * (p2.x - p1.x);
+            if (!sign) sign = Math.sign(cr); else if (Math.sign(cr) !== sign) { convex = false; break; }
+          }
+          if (!convex) continue;
+          // empty: no other anchor like these inside it or along its sides (codes side by side line up); a weak
+          // look-alike in the data doesn't count
+          let empty = true;
+          const mq = (q[0].m + q[1].m + q[2].m + q[3].m) / 4, cq = Math.min(q[0].count, q[1].count, q[2].count, q[3].count);
+          for (let k = 0; k < n && empty; k++) {
+            const p = P[k];
+            if (q.includes(p) || p.m > mq * 1.25 || p.m < mq / 1.25 || p.count < Math.max(2, cq * 0.6)) continue;
+            let inside = true;
+            for (let i = 0; i < 4; i++) {
+              const p0 = q[i], p1 = q[(i + 1) % 4], ex = p1.x - p0.x, ey = p1.y - p0.y, len = Math.hypot(ex, ey);
+              const cr = (ex * (p.y - p0.y) - ey * (p.x - p0.x)) / len, t = (ex * (p.x - p0.x) + ey * (p.y - p0.y)) / (len * len);
+              if (Math.abs(cr) < 3 * m && t > 0.08 && t < 0.92) { empty = false; break; }
+              if (cr * sign < 2 * m) inside = false;
+            }
+            if (inside) empty = false;
+          }
+          if (empty) out.push({ q, area: Math.abs(area) / 2, strength: cq });
+        }
+      }
+    }
+    // the clearest anchors first (look-alikes in the data are seen on fewer scan lines), then the smallest
+    return out.sort((x, y) => y.strength - x.strength || x.area - y.area).map((e) => e.q);
   }
 
 
@@ -3622,7 +3777,7 @@ pako/dist/pako.esm.mjs:
         const idx = [];
         for (let i = 0; i < n; i++) if (byteAmb[i] > 0.35) idx.push(i);
         idx.sort((a, c) => byteAmb[c] - byteAmb[a]);
-        if (idx.length) res = rsDecode(cw, p, idx.slice(0, p - 2));
+        if (idx.length) res = rsDecode(cw, p, idx.slice(0, p - ERASURE_SPARE));
         if (!res && idx.length > p / 2) res = rsDecode(cw, p, idx.slice(0, p >> 1));
       }
       if (!res) return null;
@@ -3776,16 +3931,27 @@ pako/dist/pako.esm.mjs:
 
     decodeOne(img) {
       const t0 = Date.now();
-      const { w, h, Y, ys } = img;
+      const { w, h } = img;
       const info = { anchors: 0, locked: false, blocks: 0, ok: 0, dup: 0, failed: 0, fixed: 0, marks: 0, cellPx: 0, ms: 0, size: [w, h] };
       const out = [];
-      const an = findAnchors(img, this.lastAnchors) || (this.lastAnchors ? findAnchors(img, null) : null);
+      // several codes were in view last frame: read them all again
+      if (this.multi) { const r = this.decodeMulti(img, info, t0, null); if (r) return r; }
+      const scan = {};
+      const an = (this.lastAnchors && findAnchors(img, this.lastAnchors)) || findAnchors(img, null, scan);
+      // anchors of several codes in view: read every code (else one code, as before)
+      // (when several sets of corners keep failing to make codes, as in a close view of part of a printed page,
+      // the search backs off for a few frames: it costs time a sweep would rather spend reading)
+      this.frameNo = (this.frameNo || 0) + 1;
+      if (scan.many && (this.still || this.frameNo >= (this.multiWait || 0))) {
+        const r = this.decodeMulti(img, info, t0, scan.cands);
+        if (r) { this.multiMiss = 0; return r; }
+        if (!this.still) { this.multiMiss = Math.min(5, (this.multiMiss || 0) + 1); this.multiWait = this.frameNo + (1 << this.multiMiss); }
+      }
       this.lastAnchors = an;
       if (!an) return this.sweepRead(img, info, t0);
       info.anchors = 4;
       info.anchorPts = an.flatMap((a) => [a.x, a.y]);
       const lv = this.anchorLevels(img, an);
-      const mid = (lv.black + lv.white) / 2;
       let lk = this.lock;
       let Hm = null;
       if (lk) {
@@ -3823,6 +3989,121 @@ pako/dist/pako.esm.mjs:
         lk.tl = { x: an[lk.rot].x, y: an[lk.rot].y };
         Hm = this.homographyFor(an, lk.rot, lk.W, lk.H, lk.A);
       }
+      this.readCode(img, lk, Hm, lv, info, out, this.prevHash);
+      info.ms = Date.now() - t0;
+      return { blocks: out, info };
+    }
+    /** Several codes in view (codes side by side on a screen, a printed page of 4 or 9): every one is read
+        through its own four anchors. null when fewer than two codes' worth of anchors are in view. */
+    decodeMulti(img, info, t0, cands) {
+      const { w, h } = img;
+      if (!cands) cands = scanRegion(img, 0, 0, w, h, w * h > 1.4e6 ? 2 : 1);
+      const good = cands.filter((c) => c.count >= 2);
+      if (good.length < 8) { this.multi = null; return null; }
+      const prev = (this.multi && this.multi.codes) || [];
+      const codes = [], used = new Set();
+      // sizes seen (codes side by side are usually all one size) are tried before any full search
+      const known = prev.map((p) => p.lk);
+      const viaConfig = (an, o, rots) => {
+        for (const rr of rots) {
+          const Hr = this.homographyFor(an, rr, o.W, o.H, o.A);
+          const cfg = Hr && this.readConfig(img, Hr, o.W, o.H, o.A);
+          if (cfg && cfg.W === o.W && cfg.H === o.H) return { cfg, rot: rr, Hm: Hr };
+        }
+        return null;
+      };
+      const quads = codeQuads(good).map((q) => ({ q, an: null }));
+      const anchorsOf = (e) => e.an || (e.an = e.q.map((c) => c.ref || (c.ref = refineAnchor(img, c))));
+      const free = (e) => !e.q.some((c) => used.has(c));
+      const take = (e, lk, Hm) => {
+        const an = e.an;
+        e.q.forEach((c) => used.add(c));
+        const cx = (an[0].x + an[1].x + an[2].x + an[3].x) / 4, cy = (an[0].y + an[1].y + an[2].y + an[3].y) / 4;
+        codes.push({ an, lk, Hm, cx, cy, size: Math.hypot(an[0].x - an[2].x, an[0].y - an[2].y) });
+      };
+      // 1: the codes of last frame (about the same place), then any code of a size already known: cheap checks
+      const cheap = () => {
+        for (const e of quads) {
+          if (codes.length >= 12) return;
+          if (!free(e)) continue;
+          const an = anchorsOf(e);
+          const cx = (an[0].x + an[1].x + an[2].x + an[3].x) / 4, cy = (an[0].y + an[1].y + an[2].y + an[3].y) / 4;
+          const old = prev.find((p) => !p.taken && Math.hypot(p.cx - cx, p.cy - cy) < p.size * 0.25);
+          if (old) {
+            const o = old.lk, r = viaConfig(an, o, [o.rot, (o.rot + 1) % 4, (o.rot + 3) % 4, (o.rot + 2) % 4]);
+            if (r) {
+              const c = r.cfg;
+              if (c.bits !== o.L.bits || c.ecc !== o.L.ecc || c.ver !== o.L.ver) {
+                const L2 = layout(o.W, o.H, c.bits, c.ecc, c.ver);
+                if (L2) { o.L = L2; o.prevHash.clear(); }
+              }
+              o.rot = r.rot; old.taken = true;
+              take(e, o, r.Hm);
+              continue;
+            }
+          }
+          for (const o of known) {
+            const r = viaConfig(an, o, [0, 1, 2, 3]);
+            const L = r && layout(o.W, o.H, r.cfg.bits, r.cfg.ecc, r.cfg.ver);
+            if (L) { take(e, { W: o.W, H: o.H, A: o.A, rot: r.rot, L, prevHash: new Map() }, r.Hm); break; }
+          }
+        }
+      };
+      cheap();
+      // 2: full searches, smallest quad first, within a time budget (they cost the most when nothing reads)
+      const until = Date.now() + (this.still ? 800 : 60);
+      let searches = 0;
+      for (const e of quads) {
+        if (codes.length >= 12) break;
+        if (!free(e)) continue;
+        if (searches >= 2 && Date.now() > until) break;
+        searches++;
+        const an = anchorsOf(e), lk = this.search(img, an);
+        const Hm = lk && this.homographyFor(an, lk.rot, lk.W, lk.H, lk.A);
+        if (!Hm) continue;
+        lk.prevHash = new Map();
+        take(e, lk, Hm);
+        known.push(lk);
+        cheap(); // its neighbours are usually the same size
+      }
+      if (!codes.length) { this.multi = null; return null; }
+      const out = [], quadsOut = [], marks = [], states = [];
+      let cellSum = 0;
+      for (const cd of codes) {
+        const ci = { anchors: 4, locked: false, blocks: 0, ok: 0, dup: 0, failed: 0, fixed: 0, marks: 0, cellPx: 0, ms: 0, size: info.size };
+        this.readCode(img, cd.lk, cd.Hm, this.anchorLevels(img, cd.an), ci, out, cd.lk.prevHash);
+        for (const k of ['blocks', 'ok', 'dup', 'failed', 'fixed', 'marks']) info[k] += ci[k];
+        quadsOut.push(ci.quad); marks.push(ci.markPts); states.push(ci.blockState);
+        cellSum += ci.cellPx;
+        if (!info.locked) {
+          Object.assign(info, { locked: true, grid: ci.grid, W: ci.W, H: ci.H, colours: ci.colours, ecc: ci.ecc, quad: ci.quad, sepRatio: ci.sepRatio, black: ci.black, white: ci.white });
+          info.anchorPts = cd.an.flatMap((a) => [a.x, a.y]);
+        }
+      }
+      info.anchors = 4 * codes.length;
+      info.codes = codes.length;
+      info.cellPx = Math.round((cellSum / codes.length) * 10) / 10;
+      info.quads = quadsOut;
+      const join = (parts, T) => { const o = new T(parts.reduce((n, p) => n + p.length, 0)); let k = 0; for (const p of parts) { o.set(p, k); k += p.length; } return o; };
+      info.markPts = join(marks, Float32Array);
+      info.blockState = join(states, Uint8Array);
+      if (codes.length > 1) {
+        this.multi = { codes: codes.map(({ lk, cx, cy, size }) => ({ lk, cx, cy, size })) };
+        this.lock = null; this.lastAnchors = null;
+      } else {
+        // one whole code (with stray anchors of others): carry on with the one-code tracker
+        const c0 = codes[0];
+        this.multi = null;
+        this.lock = c0.lk; this.prevHash = c0.lk.prevHash; this.lastAnchors = c0.an;
+        c0.lk.cfgMiss = 0; c0.lk.tl = { x: c0.an[c0.lk.rot].x, y: c0.an[c0.lk.rot].y };
+      }
+      info.ms = Date.now() - t0;
+      return { blocks: out, info };
+    }
+    /** Read every block of one code, given its lock (size, layout, turn) and homography. */
+    readCode(img, lk, Hm, lv, info, out, prevHash) {
+      const { w, h, Y, ys } = img;
+      const mid = (lv.black + lv.white) / 2;
       const L = lk.L;
       const W = L.W;
       info.locked = true;
@@ -4071,7 +4352,7 @@ pako/dist/pako.esm.mjs:
         const wh = B.white;
         let hsh = 2166136261;
         for (let i = 0; i < L.n; i++) { cw[i] ^= wh[i]; hsh = Math.imul(hsh ^ cw[i], 16777619); }
-        if (this.prevHash.get(b) === hsh) { info.dup++; state[b] = 2; continue; }
+        if (prevHash.get(b) === hsh) { info.dup++; state[b] = 2; continue; }
         let res = rsDecode(cw, L.p);
         if (!res) {
           // retry, treating the least certain bytes as erasures
@@ -4084,13 +4365,13 @@ pako/dist/pako.esm.mjs:
           const idx = [];
           for (let i = 0; i < L.n; i++) if (byteAmb[i] > 0.35) idx.push(i);
           idx.sort((a, c) => byteAmb[c] - byteAmb[a]);
-          if (idx.length) res = rsDecode(cw, L.p, idx.slice(0, L.p - 2));
+          if (idx.length) res = rsDecode(cw, L.p, idx.slice(0, L.p - ERASURE_SPARE));
           if (!res && idx.length > L.p / 2) res = rsDecode(cw, L.p, idx.slice(0, L.p >> 1));
         }
         if (!res) { info.failed++; continue; }
         const d = res.data;
         if (crc16(d, 198) !== ((d[198] << 8) | d[199])) { info.failed++; continue; }
-        this.prevHash.set(b, hsh);
+        prevHash.set(b, hsh);
         info.ok++;
         info.fixed += res.fixed;
         state[b] = 1;
@@ -4099,13 +4380,11 @@ pako/dist/pako.esm.mjs:
       info.markPts = markPts;
       info.blockState = state;
       lk.recentOk = info.ok > 0 || info.dup > 0 || (lk.recentOk && lk.cfgMiss < 3);
-      info.ms = Date.now() - t0;
-      return { blocks: out, info };
     }
   }
 
   const api = {
-    rsEncode, rsDecode, crc16, toBlock, toPacket, layout, gridFor, encodeFrame, toRGBA, findAnchors, homography, project,
+    rsEncode, rsDecode, crc16, toBlock, toPacket, layout, gridFor, gridForCell, slotGrid, composeSlots, slotPicture, SLOTS, encodeFrame, toRGBA, findAnchors, homography, project,
     imageFromRGBA, imageFromYUV, imageFromPlanes,
     GridDecoder, SweepReader, findMarks, buildLattices, PALETTES, PARITY, ECC_NAMES, DATA, PRESETS, anchorModule, VERSION,
   };
@@ -4123,11 +4402,9 @@ pako/dist/pako.esm.mjs:
     const m = e.data;
     try {
       if (m.kind === 'grid') {
-        const L = G.layout(m.W, m.H, m.bits, m.ecc);
-        if (!L) throw new Error('This grid does not fit the screen.');
-        const payloads = m.packets.map((p) => G.toBlock(new Uint8Array(p)));
-        const px = G.toRGBA(L, G.encodeFrame(L, payloads, m.seed));
-        self.postMessage({ id: m.id, W: m.W, H: m.H, buf: px.buffer }, [px.buffer]);
+        // one code, or several side by side (with their quiet zones)
+        const r = G.slotPicture(m, m.packets, m.seed);
+        self.postMessage({ id: m.id, W: r.w, H: r.h, buf: r.px.buffer }, [r.px.buffer]);
         return;
       }
       const { id, texts, ecl, cols, rows } = m;
@@ -5010,6 +5287,9 @@ pako/dist/pako.esm.mjs:
     3: [[0, 0, 0], [255, 255, 255], [255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [0, 255, 255], [255, 0, 255]],
   };
   const PARITY = [24, 36, 54]; // error correction L, M, H: bytes of parity per 200-byte block
+  // An erasure retry leaves this many parity bytes unused, so a wrong guess is caught instead of "fixed" into a
+  // block that only the CRC-16 stands between: with 2 spare, about 1 failed block in 50,000 came out wrong.
+  const ERASURE_SPARE = 8;
   const ECC_NAMES = ['L', 'M', 'H'];
   const MARK = 6; // reserved square per block: outer ring of reference colours, white ring, 2x2 black centre
   // Version 3 whitens every block with the same sequence, so a block can be read without knowing where it sits
@@ -5185,6 +5465,74 @@ pako/dist/pako.esm.mjs:
     }
     const landscape = widthPx >= heightPx;
     return { W: landscape ? Lc : S, H: landscape ? S : Lc, cell, quiet, across: Lc };
+  }
+
+  /** Grid that fills a canvas with cells of a given size (device pixels): for codes side by side, each with
+      the same cell size as one code filling the whole screen at that density. */
+  function gridForCell(widthPx, heightPx, cell) {
+    const long = Math.max(widthPx, heightPx), short = Math.min(widthPx, heightPx);
+    let A = 2, Lc = 0, S = 0, quiet = 0;
+    for (let pass = 0; pass < 3; pass++) {
+      quiet = A + 1;
+      Lc = Math.min(1023, Math.floor(long / cell) - 2 * quiet);
+      S = Math.min(Lc, Math.floor(short / cell) - 2 * quiet);
+      const A2 = anchorModule(Lc, S);
+      if (A2 === A) break;
+      A = A2;
+    }
+    const landscape = widthPx >= heightPx, W = landscape ? Lc : S, H = landscape ? S : Lc;
+    // the config strip runs along the bottom: the width must hold it; the height only some rows of blocks
+    if (W < 16 * A + UNIT || H < 16 * A + 24) return null;
+    return { W, H, cell, quiet, across: Lc };
+  }
+
+  // Several codes side by side ("slots"): the arrangements tried for each count; the one carrying the most blocks wins.
+  const SLOT_ARRANGEMENTS = { 1: [[1, 1]], 2: [[2, 1], [1, 2]], 4: [[2, 2], [4, 1], [1, 4]], 6: [[3, 2], [2, 3]], 9: [[3, 3]] };
+  const SLOTS = [1, 2, 4, 6, 9];
+  /** k codes in a canvas (device pixels), each with the cell size one code would have there at density `across`.
+      -> { k, cols, rows, W, H, cell, quiet, L, blocks, cw, ch } (cw x ch: the whole picture in cells, quiet zones
+      included), or null if they don't fit. k = 1 is exactly gridFor. */
+  function slotGrid(widthPx, heightPx, across, k, bits, ecc) {
+    const one = gridFor(widthPx, heightPx, across);
+    if (!SLOT_ARRANGEMENTS[k] || k === 1) {
+      const L = layout(one.W, one.H, bits, ecc);
+      return L && L.blocks.length ? { k: 1, cols: 1, rows: 1, ...one, L, blocks: L.blocks.length, cw: one.W + 2 * one.quiet, ch: one.H + 2 * one.quiet } : null;
+    }
+    let best = null;
+    for (const [cols, rows] of SLOT_ARRANGEMENTS[k]) {
+      const g = gridForCell(Math.floor(widthPx / cols), Math.floor(heightPx / rows), one.cell);
+      const L = g && layout(g.W, g.H, bits, ecc);
+      if (!L || !L.blocks.length) continue;
+      const blocks = L.blocks.length * k;
+      if (!best || blocks > best.blocks) best = { k, cols, rows, ...g, L, blocks, cw: cols * (g.W + 2 * g.quiet), ch: rows * (g.H + 2 * g.quiet) };
+    }
+    return best;
+  }
+  /** The codes of one picture (colour indices, one per cell) side by side with their quiet zones: cw x ch cells. */
+  function composeSlots(sg, frames) {
+    const { L, cols, quiet: q, cw, ch } = sg, W = L.W, H = L.H, tw = W + 2 * q, th = H + 2 * q;
+    const out = new Uint8Array(cw * ch).fill(L.WHITE);
+    frames.forEach((idx, t) => {
+      const ox = (t % cols) * tw + q, oy = Math.floor(t / cols) * th + q;
+      for (let y = 0; y < H; y++) out.set(idx.subarray(y * W, (y + 1) * W), (oy + y) * cw + ox);
+    });
+    return out;
+  }
+
+  /** One sender picture as RGBA: job { W, H, bits, ecc, k, cols, quiet } (W x H one code), packets: k x blocks
+      fountain packets (ArrayBuffers or Uint8Arrays). One code: just the grid (the page adds the quiet zone);
+      several: all of them with their quiet zones. -> { px: Uint32Array, w, h } */
+  function slotPicture(job, packets, seed) {
+    const L = layout(job.W, job.H, job.bits, job.ecc);
+    if (!L) throw new Error('This grid does not fit the screen.');
+    const per = L.blocks.length, k = job.k || 1;
+    const frame = (t) => encodeFrame(L, L.blocks.map((_, i) => toBlock(new Uint8Array(packets[t * per + i]))), k === 1 ? seed : seed * 16 + t);
+    if (k === 1) return { px: toRGBA(L, frame(0)), w: L.W, h: L.H };
+    const q = job.quiet, cols = job.cols, rows = Math.ceil(k / cols);
+    const sg = { L, cols, quiet: q, cw: cols * (L.W + 2 * q), ch: rows * (L.H + 2 * q) };
+    const frames = [];
+    for (let t = 0; t < k; t++) frames.push(frame(t));
+    return { px: toRGBA(L, composeSlots(sg, frames)), w: sg.cw, h: sg.ch };
   }
 
   // ------------------------------------------------------------------ encoder
@@ -5468,7 +5816,7 @@ pako/dist/pako.esm.mjs:
   }
 
   /** Find the four corner anchors. With `hint` (last frame's anchors) only small windows around them are searched. */
-  function findAnchors(img, hint) {
+  function findAnchors(img, hint, keep) {
     const { w, h } = img;
     const f = w * h > 1.4e6 ? 2 : 1;
     if (hint) {
@@ -5487,8 +5835,69 @@ pako/dist/pako.esm.mjs:
         if (q) return q.map((c) => refineAnchor(img, c));
       }
     }
-    const q = pickFour(scanRegion(img, 0, 0, w, h, f));
+    const cands = scanRegion(img, 0, 0, w, h, f);
+    if (keep) { keep.cands = cands; keep.many = cands.filter((c) => c.count >= 2).length >= 8; } // maybe several codes
+    const q = pickFour(cands);
     return q ? q.map((c) => refineAnchor(img, c)) : null;
+  }
+  /** Every set of four anchor candidates that could be one code: similar size, a convex near-rectangle with no
+      other similar anchor inside it or along its sides. Clearest anchors first, then smallest. */
+  function codeQuads(cands) {
+    const P = cands.slice().sort((a, b) => b.count - a.count).slice(0, 40), n = P.length, out = [];
+    const order = (q) => {
+      const cx = (q[0].x + q[1].x + q[2].x + q[3].x) / 4, cy = (q[0].y + q[1].y + q[2].y + q[3].y) / 4;
+      return q.sort((p1, p2) => Math.atan2(p1.y - cy, p1.x - cx) - Math.atan2(p2.y - cy, p2.x - cx));
+    };
+    const similar = (a, b) => a.m < b.m * 1.3 && b.m < a.m * 1.3;
+    for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) {
+      if (!similar(P[a], P[b])) continue;
+      for (let c = b + 1; c < n; c++) {
+        if (!similar(P[a], P[c]) || !similar(P[b], P[c])) continue;
+        for (let d = c + 1; d < n; d++) {
+          if (!similar(P[a], P[d]) || !similar(P[b], P[d]) || !similar(P[c], P[d])) continue;
+          const q = order([P[a], P[b], P[c], P[d]]);
+          const m = Math.min(q[0].m, q[1].m, q[2].m, q[3].m);
+          const side = [0, 1, 2, 3].map((i) => Math.hypot(q[i].x - q[(i + 1) % 4].x, q[i].y - q[(i + 1) % 4].y));
+          // a code's anchors are at least 13 anchor modules apart; the gap between codes side by side is about 10
+          if (Math.min(...side) < 12 * m || Math.max(...side) > 6 * Math.min(...side)) continue;
+          if (side[0] > side[2] * 1.6 || side[2] > side[0] * 1.6 || side[1] > side[3] * 1.6 || side[3] > side[1] * 1.6) continue;
+          let square = true; // corners near right angles (a mild tilt at most)
+          for (let i = 0; i < 4 && square; i++) {
+            const p0 = q[(i + 3) % 4], p1 = q[i], p2 = q[(i + 1) % 4];
+            const cos = ((p0.x - p1.x) * (p2.x - p1.x) + (p0.y - p1.y) * (p2.y - p1.y)) / (side[(i + 3) % 4] * side[i]);
+            if (Math.abs(cos) > 0.3) square = false; // 72° to 108°
+          }
+          if (!square) continue;
+          let sign = 0, convex = true, area = 0;
+          for (let i = 0; i < 4; i++) {
+            const p0 = q[i], p1 = q[(i + 1) % 4], p2 = q[(i + 2) % 4];
+            area += p0.x * p1.y - p1.x * p0.y;
+            const cr = (p1.x - p0.x) * (p2.y - p1.y) - (p1.y - p0.y) * (p2.x - p1.x);
+            if (!sign) sign = Math.sign(cr); else if (Math.sign(cr) !== sign) { convex = false; break; }
+          }
+          if (!convex) continue;
+          // empty: no other anchor like these inside it or along its sides (codes side by side line up); a weak
+          // look-alike in the data doesn't count
+          let empty = true;
+          const mq = (q[0].m + q[1].m + q[2].m + q[3].m) / 4, cq = Math.min(q[0].count, q[1].count, q[2].count, q[3].count);
+          for (let k = 0; k < n && empty; k++) {
+            const p = P[k];
+            if (q.includes(p) || p.m > mq * 1.25 || p.m < mq / 1.25 || p.count < Math.max(2, cq * 0.6)) continue;
+            let inside = true;
+            for (let i = 0; i < 4; i++) {
+              const p0 = q[i], p1 = q[(i + 1) % 4], ex = p1.x - p0.x, ey = p1.y - p0.y, len = Math.hypot(ex, ey);
+              const cr = (ex * (p.y - p0.y) - ey * (p.x - p0.x)) / len, t = (ex * (p.x - p0.x) + ey * (p.y - p0.y)) / (len * len);
+              if (Math.abs(cr) < 3 * m && t > 0.08 && t < 0.92) { empty = false; break; }
+              if (cr * sign < 2 * m) inside = false;
+            }
+            if (inside) empty = false;
+          }
+          if (empty) out.push({ q, area: Math.abs(area) / 2, strength: cq });
+        }
+      }
+    }
+    // the clearest anchors first (look-alikes in the data are seen on fewer scan lines), then the smallest
+    return out.sort((x, y) => y.strength - x.strength || x.area - y.area).map((e) => e.q);
   }
 
 
@@ -6080,7 +6489,7 @@ pako/dist/pako.esm.mjs:
         const idx = [];
         for (let i = 0; i < n; i++) if (byteAmb[i] > 0.35) idx.push(i);
         idx.sort((a, c) => byteAmb[c] - byteAmb[a]);
-        if (idx.length) res = rsDecode(cw, p, idx.slice(0, p - 2));
+        if (idx.length) res = rsDecode(cw, p, idx.slice(0, p - ERASURE_SPARE));
         if (!res && idx.length > p / 2) res = rsDecode(cw, p, idx.slice(0, p >> 1));
       }
       if (!res) return null;
@@ -6234,16 +6643,27 @@ pako/dist/pako.esm.mjs:
 
     decodeOne(img) {
       const t0 = Date.now();
-      const { w, h, Y, ys } = img;
+      const { w, h } = img;
       const info = { anchors: 0, locked: false, blocks: 0, ok: 0, dup: 0, failed: 0, fixed: 0, marks: 0, cellPx: 0, ms: 0, size: [w, h] };
       const out = [];
-      const an = findAnchors(img, this.lastAnchors) || (this.lastAnchors ? findAnchors(img, null) : null);
+      // several codes were in view last frame: read them all again
+      if (this.multi) { const r = this.decodeMulti(img, info, t0, null); if (r) return r; }
+      const scan = {};
+      const an = (this.lastAnchors && findAnchors(img, this.lastAnchors)) || findAnchors(img, null, scan);
+      // anchors of several codes in view: read every code (else one code, as before)
+      // (when several sets of corners keep failing to make codes, as in a close view of part of a printed page,
+      // the search backs off for a few frames: it costs time a sweep would rather spend reading)
+      this.frameNo = (this.frameNo || 0) + 1;
+      if (scan.many && (this.still || this.frameNo >= (this.multiWait || 0))) {
+        const r = this.decodeMulti(img, info, t0, scan.cands);
+        if (r) { this.multiMiss = 0; return r; }
+        if (!this.still) { this.multiMiss = Math.min(5, (this.multiMiss || 0) + 1); this.multiWait = this.frameNo + (1 << this.multiMiss); }
+      }
       this.lastAnchors = an;
       if (!an) return this.sweepRead(img, info, t0);
       info.anchors = 4;
       info.anchorPts = an.flatMap((a) => [a.x, a.y]);
       const lv = this.anchorLevels(img, an);
-      const mid = (lv.black + lv.white) / 2;
       let lk = this.lock;
       let Hm = null;
       if (lk) {
@@ -6281,6 +6701,121 @@ pako/dist/pako.esm.mjs:
         lk.tl = { x: an[lk.rot].x, y: an[lk.rot].y };
         Hm = this.homographyFor(an, lk.rot, lk.W, lk.H, lk.A);
       }
+      this.readCode(img, lk, Hm, lv, info, out, this.prevHash);
+      info.ms = Date.now() - t0;
+      return { blocks: out, info };
+    }
+    /** Several codes in view (codes side by side on a screen, a printed page of 4 or 9): every one is read
+        through its own four anchors. null when fewer than two codes' worth of anchors are in view. */
+    decodeMulti(img, info, t0, cands) {
+      const { w, h } = img;
+      if (!cands) cands = scanRegion(img, 0, 0, w, h, w * h > 1.4e6 ? 2 : 1);
+      const good = cands.filter((c) => c.count >= 2);
+      if (good.length < 8) { this.multi = null; return null; }
+      const prev = (this.multi && this.multi.codes) || [];
+      const codes = [], used = new Set();
+      // sizes seen (codes side by side are usually all one size) are tried before any full search
+      const known = prev.map((p) => p.lk);
+      const viaConfig = (an, o, rots) => {
+        for (const rr of rots) {
+          const Hr = this.homographyFor(an, rr, o.W, o.H, o.A);
+          const cfg = Hr && this.readConfig(img, Hr, o.W, o.H, o.A);
+          if (cfg && cfg.W === o.W && cfg.H === o.H) return { cfg, rot: rr, Hm: Hr };
+        }
+        return null;
+      };
+      const quads = codeQuads(good).map((q) => ({ q, an: null }));
+      const anchorsOf = (e) => e.an || (e.an = e.q.map((c) => c.ref || (c.ref = refineAnchor(img, c))));
+      const free = (e) => !e.q.some((c) => used.has(c));
+      const take = (e, lk, Hm) => {
+        const an = e.an;
+        e.q.forEach((c) => used.add(c));
+        const cx = (an[0].x + an[1].x + an[2].x + an[3].x) / 4, cy = (an[0].y + an[1].y + an[2].y + an[3].y) / 4;
+        codes.push({ an, lk, Hm, cx, cy, size: Math.hypot(an[0].x - an[2].x, an[0].y - an[2].y) });
+      };
+      // 1: the codes of last frame (about the same place), then any code of a size already known: cheap checks
+      const cheap = () => {
+        for (const e of quads) {
+          if (codes.length >= 12) return;
+          if (!free(e)) continue;
+          const an = anchorsOf(e);
+          const cx = (an[0].x + an[1].x + an[2].x + an[3].x) / 4, cy = (an[0].y + an[1].y + an[2].y + an[3].y) / 4;
+          const old = prev.find((p) => !p.taken && Math.hypot(p.cx - cx, p.cy - cy) < p.size * 0.25);
+          if (old) {
+            const o = old.lk, r = viaConfig(an, o, [o.rot, (o.rot + 1) % 4, (o.rot + 3) % 4, (o.rot + 2) % 4]);
+            if (r) {
+              const c = r.cfg;
+              if (c.bits !== o.L.bits || c.ecc !== o.L.ecc || c.ver !== o.L.ver) {
+                const L2 = layout(o.W, o.H, c.bits, c.ecc, c.ver);
+                if (L2) { o.L = L2; o.prevHash.clear(); }
+              }
+              o.rot = r.rot; old.taken = true;
+              take(e, o, r.Hm);
+              continue;
+            }
+          }
+          for (const o of known) {
+            const r = viaConfig(an, o, [0, 1, 2, 3]);
+            const L = r && layout(o.W, o.H, r.cfg.bits, r.cfg.ecc, r.cfg.ver);
+            if (L) { take(e, { W: o.W, H: o.H, A: o.A, rot: r.rot, L, prevHash: new Map() }, r.Hm); break; }
+          }
+        }
+      };
+      cheap();
+      // 2: full searches, smallest quad first, within a time budget (they cost the most when nothing reads)
+      const until = Date.now() + (this.still ? 800 : 60);
+      let searches = 0;
+      for (const e of quads) {
+        if (codes.length >= 12) break;
+        if (!free(e)) continue;
+        if (searches >= 2 && Date.now() > until) break;
+        searches++;
+        const an = anchorsOf(e), lk = this.search(img, an);
+        const Hm = lk && this.homographyFor(an, lk.rot, lk.W, lk.H, lk.A);
+        if (!Hm) continue;
+        lk.prevHash = new Map();
+        take(e, lk, Hm);
+        known.push(lk);
+        cheap(); // its neighbours are usually the same size
+      }
+      if (!codes.length) { this.multi = null; return null; }
+      const out = [], quadsOut = [], marks = [], states = [];
+      let cellSum = 0;
+      for (const cd of codes) {
+        const ci = { anchors: 4, locked: false, blocks: 0, ok: 0, dup: 0, failed: 0, fixed: 0, marks: 0, cellPx: 0, ms: 0, size: info.size };
+        this.readCode(img, cd.lk, cd.Hm, this.anchorLevels(img, cd.an), ci, out, cd.lk.prevHash);
+        for (const k of ['blocks', 'ok', 'dup', 'failed', 'fixed', 'marks']) info[k] += ci[k];
+        quadsOut.push(ci.quad); marks.push(ci.markPts); states.push(ci.blockState);
+        cellSum += ci.cellPx;
+        if (!info.locked) {
+          Object.assign(info, { locked: true, grid: ci.grid, W: ci.W, H: ci.H, colours: ci.colours, ecc: ci.ecc, quad: ci.quad, sepRatio: ci.sepRatio, black: ci.black, white: ci.white });
+          info.anchorPts = cd.an.flatMap((a) => [a.x, a.y]);
+        }
+      }
+      info.anchors = 4 * codes.length;
+      info.codes = codes.length;
+      info.cellPx = Math.round((cellSum / codes.length) * 10) / 10;
+      info.quads = quadsOut;
+      const join = (parts, T) => { const o = new T(parts.reduce((n, p) => n + p.length, 0)); let k = 0; for (const p of parts) { o.set(p, k); k += p.length; } return o; };
+      info.markPts = join(marks, Float32Array);
+      info.blockState = join(states, Uint8Array);
+      if (codes.length > 1) {
+        this.multi = { codes: codes.map(({ lk, cx, cy, size }) => ({ lk, cx, cy, size })) };
+        this.lock = null; this.lastAnchors = null;
+      } else {
+        // one whole code (with stray anchors of others): carry on with the one-code tracker
+        const c0 = codes[0];
+        this.multi = null;
+        this.lock = c0.lk; this.prevHash = c0.lk.prevHash; this.lastAnchors = c0.an;
+        c0.lk.cfgMiss = 0; c0.lk.tl = { x: c0.an[c0.lk.rot].x, y: c0.an[c0.lk.rot].y };
+      }
+      info.ms = Date.now() - t0;
+      return { blocks: out, info };
+    }
+    /** Read every block of one code, given its lock (size, layout, turn) and homography. */
+    readCode(img, lk, Hm, lv, info, out, prevHash) {
+      const { w, h, Y, ys } = img;
+      const mid = (lv.black + lv.white) / 2;
       const L = lk.L;
       const W = L.W;
       info.locked = true;
@@ -6529,7 +7064,7 @@ pako/dist/pako.esm.mjs:
         const wh = B.white;
         let hsh = 2166136261;
         for (let i = 0; i < L.n; i++) { cw[i] ^= wh[i]; hsh = Math.imul(hsh ^ cw[i], 16777619); }
-        if (this.prevHash.get(b) === hsh) { info.dup++; state[b] = 2; continue; }
+        if (prevHash.get(b) === hsh) { info.dup++; state[b] = 2; continue; }
         let res = rsDecode(cw, L.p);
         if (!res) {
           // retry, treating the least certain bytes as erasures
@@ -6542,13 +7077,13 @@ pako/dist/pako.esm.mjs:
           const idx = [];
           for (let i = 0; i < L.n; i++) if (byteAmb[i] > 0.35) idx.push(i);
           idx.sort((a, c) => byteAmb[c] - byteAmb[a]);
-          if (idx.length) res = rsDecode(cw, L.p, idx.slice(0, L.p - 2));
+          if (idx.length) res = rsDecode(cw, L.p, idx.slice(0, L.p - ERASURE_SPARE));
           if (!res && idx.length > L.p / 2) res = rsDecode(cw, L.p, idx.slice(0, L.p >> 1));
         }
         if (!res) { info.failed++; continue; }
         const d = res.data;
         if (crc16(d, 198) !== ((d[198] << 8) | d[199])) { info.failed++; continue; }
-        this.prevHash.set(b, hsh);
+        prevHash.set(b, hsh);
         info.ok++;
         info.fixed += res.fixed;
         state[b] = 1;
@@ -6557,13 +7092,11 @@ pako/dist/pako.esm.mjs:
       info.markPts = markPts;
       info.blockState = state;
       lk.recentOk = info.ok > 0 || info.dup > 0 || (lk.recentOk && lk.cfgMiss < 3);
-      info.ms = Date.now() - t0;
-      return { blocks: out, info };
     }
   }
 
   const api = {
-    rsEncode, rsDecode, crc16, toBlock, toPacket, layout, gridFor, encodeFrame, toRGBA, findAnchors, homography, project,
+    rsEncode, rsDecode, crc16, toBlock, toPacket, layout, gridFor, gridForCell, slotGrid, composeSlots, slotPicture, SLOTS, encodeFrame, toRGBA, findAnchors, homography, project,
     imageFromRGBA, imageFromYUV, imageFromPlanes,
     GridDecoder, SweepReader, findMarks, buildLattices, PALETTES, PARITY, ECC_NAMES, DATA, PRESETS, anchorModule, VERSION,
   };
@@ -6630,7 +7163,7 @@ pako/dist/pako.esm.mjs:
   }
   async function handle(m, viaPort) {
     const t = performance.now();
-    const extra = {};
+    const extra = m.id != null ? { id: m.id } : {}; // a caller's tag, so it can tell its answer from an older one's
     try {
       let img;
       if (m.type === 'frame') {
@@ -6654,7 +7187,7 @@ pako/dist/pako.esm.mjs:
       }
       self.postMessage({ type: 'result', packets, info: r.info, ms: performance.now() - t, kind: img.kind, ...extra }, extra.thumb ? [...packets, extra.thumb] : packets);
     } catch (err) {
-      self.postMessage({ type: 'result', packets: [], info: { error: String((err && err.message) || err) }, ms: performance.now() - t, needPage: m.type === 'photo' });
+      self.postMessage({ type: 'result', packets: [], info: { error: String((err && err.message) || err) }, ms: performance.now() - t, needPage: m.type === 'photo', id: extra.id });
     }
     if (viaPort && port) port.postMessage('idle');
   }
@@ -6938,6 +7471,9 @@ pako/dist/pako.esm.mjs:
     3: [[0, 0, 0], [255, 255, 255], [255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [0, 255, 255], [255, 0, 255]],
   };
   const PARITY = [24, 36, 54]; // error correction L, M, H: bytes of parity per 200-byte block
+  // An erasure retry leaves this many parity bytes unused, so a wrong guess is caught instead of "fixed" into a
+  // block that only the CRC-16 stands between: with 2 spare, about 1 failed block in 50,000 came out wrong.
+  const ERASURE_SPARE = 8;
   const ECC_NAMES = ['L', 'M', 'H'];
   const MARK = 6; // reserved square per block: outer ring of reference colours, white ring, 2x2 black centre
   // Version 3 whitens every block with the same sequence, so a block can be read without knowing where it sits
@@ -7113,6 +7649,74 @@ pako/dist/pako.esm.mjs:
     }
     const landscape = widthPx >= heightPx;
     return { W: landscape ? Lc : S, H: landscape ? S : Lc, cell, quiet, across: Lc };
+  }
+
+  /** Grid that fills a canvas with cells of a given size (device pixels): for codes side by side, each with
+      the same cell size as one code filling the whole screen at that density. */
+  function gridForCell(widthPx, heightPx, cell) {
+    const long = Math.max(widthPx, heightPx), short = Math.min(widthPx, heightPx);
+    let A = 2, Lc = 0, S = 0, quiet = 0;
+    for (let pass = 0; pass < 3; pass++) {
+      quiet = A + 1;
+      Lc = Math.min(1023, Math.floor(long / cell) - 2 * quiet);
+      S = Math.min(Lc, Math.floor(short / cell) - 2 * quiet);
+      const A2 = anchorModule(Lc, S);
+      if (A2 === A) break;
+      A = A2;
+    }
+    const landscape = widthPx >= heightPx, W = landscape ? Lc : S, H = landscape ? S : Lc;
+    // the config strip runs along the bottom: the width must hold it; the height only some rows of blocks
+    if (W < 16 * A + UNIT || H < 16 * A + 24) return null;
+    return { W, H, cell, quiet, across: Lc };
+  }
+
+  // Several codes side by side ("slots"): the arrangements tried for each count; the one carrying the most blocks wins.
+  const SLOT_ARRANGEMENTS = { 1: [[1, 1]], 2: [[2, 1], [1, 2]], 4: [[2, 2], [4, 1], [1, 4]], 6: [[3, 2], [2, 3]], 9: [[3, 3]] };
+  const SLOTS = [1, 2, 4, 6, 9];
+  /** k codes in a canvas (device pixels), each with the cell size one code would have there at density `across`.
+      -> { k, cols, rows, W, H, cell, quiet, L, blocks, cw, ch } (cw x ch: the whole picture in cells, quiet zones
+      included), or null if they don't fit. k = 1 is exactly gridFor. */
+  function slotGrid(widthPx, heightPx, across, k, bits, ecc) {
+    const one = gridFor(widthPx, heightPx, across);
+    if (!SLOT_ARRANGEMENTS[k] || k === 1) {
+      const L = layout(one.W, one.H, bits, ecc);
+      return L && L.blocks.length ? { k: 1, cols: 1, rows: 1, ...one, L, blocks: L.blocks.length, cw: one.W + 2 * one.quiet, ch: one.H + 2 * one.quiet } : null;
+    }
+    let best = null;
+    for (const [cols, rows] of SLOT_ARRANGEMENTS[k]) {
+      const g = gridForCell(Math.floor(widthPx / cols), Math.floor(heightPx / rows), one.cell);
+      const L = g && layout(g.W, g.H, bits, ecc);
+      if (!L || !L.blocks.length) continue;
+      const blocks = L.blocks.length * k;
+      if (!best || blocks > best.blocks) best = { k, cols, rows, ...g, L, blocks, cw: cols * (g.W + 2 * g.quiet), ch: rows * (g.H + 2 * g.quiet) };
+    }
+    return best;
+  }
+  /** The codes of one picture (colour indices, one per cell) side by side with their quiet zones: cw x ch cells. */
+  function composeSlots(sg, frames) {
+    const { L, cols, quiet: q, cw, ch } = sg, W = L.W, H = L.H, tw = W + 2 * q, th = H + 2 * q;
+    const out = new Uint8Array(cw * ch).fill(L.WHITE);
+    frames.forEach((idx, t) => {
+      const ox = (t % cols) * tw + q, oy = Math.floor(t / cols) * th + q;
+      for (let y = 0; y < H; y++) out.set(idx.subarray(y * W, (y + 1) * W), (oy + y) * cw + ox);
+    });
+    return out;
+  }
+
+  /** One sender picture as RGBA: job { W, H, bits, ecc, k, cols, quiet } (W x H one code), packets: k x blocks
+      fountain packets (ArrayBuffers or Uint8Arrays). One code: just the grid (the page adds the quiet zone);
+      several: all of them with their quiet zones. -> { px: Uint32Array, w, h } */
+  function slotPicture(job, packets, seed) {
+    const L = layout(job.W, job.H, job.bits, job.ecc);
+    if (!L) throw new Error('This grid does not fit the screen.');
+    const per = L.blocks.length, k = job.k || 1;
+    const frame = (t) => encodeFrame(L, L.blocks.map((_, i) => toBlock(new Uint8Array(packets[t * per + i]))), k === 1 ? seed : seed * 16 + t);
+    if (k === 1) return { px: toRGBA(L, frame(0)), w: L.W, h: L.H };
+    const q = job.quiet, cols = job.cols, rows = Math.ceil(k / cols);
+    const sg = { L, cols, quiet: q, cw: cols * (L.W + 2 * q), ch: rows * (L.H + 2 * q) };
+    const frames = [];
+    for (let t = 0; t < k; t++) frames.push(frame(t));
+    return { px: toRGBA(L, composeSlots(sg, frames)), w: sg.cw, h: sg.ch };
   }
 
   // ------------------------------------------------------------------ encoder
@@ -7396,7 +8000,7 @@ pako/dist/pako.esm.mjs:
   }
 
   /** Find the four corner anchors. With `hint` (last frame's anchors) only small windows around them are searched. */
-  function findAnchors(img, hint) {
+  function findAnchors(img, hint, keep) {
     const { w, h } = img;
     const f = w * h > 1.4e6 ? 2 : 1;
     if (hint) {
@@ -7415,8 +8019,69 @@ pako/dist/pako.esm.mjs:
         if (q) return q.map((c) => refineAnchor(img, c));
       }
     }
-    const q = pickFour(scanRegion(img, 0, 0, w, h, f));
+    const cands = scanRegion(img, 0, 0, w, h, f);
+    if (keep) { keep.cands = cands; keep.many = cands.filter((c) => c.count >= 2).length >= 8; } // maybe several codes
+    const q = pickFour(cands);
     return q ? q.map((c) => refineAnchor(img, c)) : null;
+  }
+  /** Every set of four anchor candidates that could be one code: similar size, a convex near-rectangle with no
+      other similar anchor inside it or along its sides. Clearest anchors first, then smallest. */
+  function codeQuads(cands) {
+    const P = cands.slice().sort((a, b) => b.count - a.count).slice(0, 40), n = P.length, out = [];
+    const order = (q) => {
+      const cx = (q[0].x + q[1].x + q[2].x + q[3].x) / 4, cy = (q[0].y + q[1].y + q[2].y + q[3].y) / 4;
+      return q.sort((p1, p2) => Math.atan2(p1.y - cy, p1.x - cx) - Math.atan2(p2.y - cy, p2.x - cx));
+    };
+    const similar = (a, b) => a.m < b.m * 1.3 && b.m < a.m * 1.3;
+    for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) {
+      if (!similar(P[a], P[b])) continue;
+      for (let c = b + 1; c < n; c++) {
+        if (!similar(P[a], P[c]) || !similar(P[b], P[c])) continue;
+        for (let d = c + 1; d < n; d++) {
+          if (!similar(P[a], P[d]) || !similar(P[b], P[d]) || !similar(P[c], P[d])) continue;
+          const q = order([P[a], P[b], P[c], P[d]]);
+          const m = Math.min(q[0].m, q[1].m, q[2].m, q[3].m);
+          const side = [0, 1, 2, 3].map((i) => Math.hypot(q[i].x - q[(i + 1) % 4].x, q[i].y - q[(i + 1) % 4].y));
+          // a code's anchors are at least 13 anchor modules apart; the gap between codes side by side is about 10
+          if (Math.min(...side) < 12 * m || Math.max(...side) > 6 * Math.min(...side)) continue;
+          if (side[0] > side[2] * 1.6 || side[2] > side[0] * 1.6 || side[1] > side[3] * 1.6 || side[3] > side[1] * 1.6) continue;
+          let square = true; // corners near right angles (a mild tilt at most)
+          for (let i = 0; i < 4 && square; i++) {
+            const p0 = q[(i + 3) % 4], p1 = q[i], p2 = q[(i + 1) % 4];
+            const cos = ((p0.x - p1.x) * (p2.x - p1.x) + (p0.y - p1.y) * (p2.y - p1.y)) / (side[(i + 3) % 4] * side[i]);
+            if (Math.abs(cos) > 0.3) square = false; // 72° to 108°
+          }
+          if (!square) continue;
+          let sign = 0, convex = true, area = 0;
+          for (let i = 0; i < 4; i++) {
+            const p0 = q[i], p1 = q[(i + 1) % 4], p2 = q[(i + 2) % 4];
+            area += p0.x * p1.y - p1.x * p0.y;
+            const cr = (p1.x - p0.x) * (p2.y - p1.y) - (p1.y - p0.y) * (p2.x - p1.x);
+            if (!sign) sign = Math.sign(cr); else if (Math.sign(cr) !== sign) { convex = false; break; }
+          }
+          if (!convex) continue;
+          // empty: no other anchor like these inside it or along its sides (codes side by side line up); a weak
+          // look-alike in the data doesn't count
+          let empty = true;
+          const mq = (q[0].m + q[1].m + q[2].m + q[3].m) / 4, cq = Math.min(q[0].count, q[1].count, q[2].count, q[3].count);
+          for (let k = 0; k < n && empty; k++) {
+            const p = P[k];
+            if (q.includes(p) || p.m > mq * 1.25 || p.m < mq / 1.25 || p.count < Math.max(2, cq * 0.6)) continue;
+            let inside = true;
+            for (let i = 0; i < 4; i++) {
+              const p0 = q[i], p1 = q[(i + 1) % 4], ex = p1.x - p0.x, ey = p1.y - p0.y, len = Math.hypot(ex, ey);
+              const cr = (ex * (p.y - p0.y) - ey * (p.x - p0.x)) / len, t = (ex * (p.x - p0.x) + ey * (p.y - p0.y)) / (len * len);
+              if (Math.abs(cr) < 3 * m && t > 0.08 && t < 0.92) { empty = false; break; }
+              if (cr * sign < 2 * m) inside = false;
+            }
+            if (inside) empty = false;
+          }
+          if (empty) out.push({ q, area: Math.abs(area) / 2, strength: cq });
+        }
+      }
+    }
+    // the clearest anchors first (look-alikes in the data are seen on fewer scan lines), then the smallest
+    return out.sort((x, y) => y.strength - x.strength || x.area - y.area).map((e) => e.q);
   }
 
 
@@ -8008,7 +8673,7 @@ pako/dist/pako.esm.mjs:
         const idx = [];
         for (let i = 0; i < n; i++) if (byteAmb[i] > 0.35) idx.push(i);
         idx.sort((a, c) => byteAmb[c] - byteAmb[a]);
-        if (idx.length) res = rsDecode(cw, p, idx.slice(0, p - 2));
+        if (idx.length) res = rsDecode(cw, p, idx.slice(0, p - ERASURE_SPARE));
         if (!res && idx.length > p / 2) res = rsDecode(cw, p, idx.slice(0, p >> 1));
       }
       if (!res) return null;
@@ -8162,16 +8827,27 @@ pako/dist/pako.esm.mjs:
 
     decodeOne(img) {
       const t0 = Date.now();
-      const { w, h, Y, ys } = img;
+      const { w, h } = img;
       const info = { anchors: 0, locked: false, blocks: 0, ok: 0, dup: 0, failed: 0, fixed: 0, marks: 0, cellPx: 0, ms: 0, size: [w, h] };
       const out = [];
-      const an = findAnchors(img, this.lastAnchors) || (this.lastAnchors ? findAnchors(img, null) : null);
+      // several codes were in view last frame: read them all again
+      if (this.multi) { const r = this.decodeMulti(img, info, t0, null); if (r) return r; }
+      const scan = {};
+      const an = (this.lastAnchors && findAnchors(img, this.lastAnchors)) || findAnchors(img, null, scan);
+      // anchors of several codes in view: read every code (else one code, as before)
+      // (when several sets of corners keep failing to make codes, as in a close view of part of a printed page,
+      // the search backs off for a few frames: it costs time a sweep would rather spend reading)
+      this.frameNo = (this.frameNo || 0) + 1;
+      if (scan.many && (this.still || this.frameNo >= (this.multiWait || 0))) {
+        const r = this.decodeMulti(img, info, t0, scan.cands);
+        if (r) { this.multiMiss = 0; return r; }
+        if (!this.still) { this.multiMiss = Math.min(5, (this.multiMiss || 0) + 1); this.multiWait = this.frameNo + (1 << this.multiMiss); }
+      }
       this.lastAnchors = an;
       if (!an) return this.sweepRead(img, info, t0);
       info.anchors = 4;
       info.anchorPts = an.flatMap((a) => [a.x, a.y]);
       const lv = this.anchorLevels(img, an);
-      const mid = (lv.black + lv.white) / 2;
       let lk = this.lock;
       let Hm = null;
       if (lk) {
@@ -8209,6 +8885,121 @@ pako/dist/pako.esm.mjs:
         lk.tl = { x: an[lk.rot].x, y: an[lk.rot].y };
         Hm = this.homographyFor(an, lk.rot, lk.W, lk.H, lk.A);
       }
+      this.readCode(img, lk, Hm, lv, info, out, this.prevHash);
+      info.ms = Date.now() - t0;
+      return { blocks: out, info };
+    }
+    /** Several codes in view (codes side by side on a screen, a printed page of 4 or 9): every one is read
+        through its own four anchors. null when fewer than two codes' worth of anchors are in view. */
+    decodeMulti(img, info, t0, cands) {
+      const { w, h } = img;
+      if (!cands) cands = scanRegion(img, 0, 0, w, h, w * h > 1.4e6 ? 2 : 1);
+      const good = cands.filter((c) => c.count >= 2);
+      if (good.length < 8) { this.multi = null; return null; }
+      const prev = (this.multi && this.multi.codes) || [];
+      const codes = [], used = new Set();
+      // sizes seen (codes side by side are usually all one size) are tried before any full search
+      const known = prev.map((p) => p.lk);
+      const viaConfig = (an, o, rots) => {
+        for (const rr of rots) {
+          const Hr = this.homographyFor(an, rr, o.W, o.H, o.A);
+          const cfg = Hr && this.readConfig(img, Hr, o.W, o.H, o.A);
+          if (cfg && cfg.W === o.W && cfg.H === o.H) return { cfg, rot: rr, Hm: Hr };
+        }
+        return null;
+      };
+      const quads = codeQuads(good).map((q) => ({ q, an: null }));
+      const anchorsOf = (e) => e.an || (e.an = e.q.map((c) => c.ref || (c.ref = refineAnchor(img, c))));
+      const free = (e) => !e.q.some((c) => used.has(c));
+      const take = (e, lk, Hm) => {
+        const an = e.an;
+        e.q.forEach((c) => used.add(c));
+        const cx = (an[0].x + an[1].x + an[2].x + an[3].x) / 4, cy = (an[0].y + an[1].y + an[2].y + an[3].y) / 4;
+        codes.push({ an, lk, Hm, cx, cy, size: Math.hypot(an[0].x - an[2].x, an[0].y - an[2].y) });
+      };
+      // 1: the codes of last frame (about the same place), then any code of a size already known: cheap checks
+      const cheap = () => {
+        for (const e of quads) {
+          if (codes.length >= 12) return;
+          if (!free(e)) continue;
+          const an = anchorsOf(e);
+          const cx = (an[0].x + an[1].x + an[2].x + an[3].x) / 4, cy = (an[0].y + an[1].y + an[2].y + an[3].y) / 4;
+          const old = prev.find((p) => !p.taken && Math.hypot(p.cx - cx, p.cy - cy) < p.size * 0.25);
+          if (old) {
+            const o = old.lk, r = viaConfig(an, o, [o.rot, (o.rot + 1) % 4, (o.rot + 3) % 4, (o.rot + 2) % 4]);
+            if (r) {
+              const c = r.cfg;
+              if (c.bits !== o.L.bits || c.ecc !== o.L.ecc || c.ver !== o.L.ver) {
+                const L2 = layout(o.W, o.H, c.bits, c.ecc, c.ver);
+                if (L2) { o.L = L2; o.prevHash.clear(); }
+              }
+              o.rot = r.rot; old.taken = true;
+              take(e, o, r.Hm);
+              continue;
+            }
+          }
+          for (const o of known) {
+            const r = viaConfig(an, o, [0, 1, 2, 3]);
+            const L = r && layout(o.W, o.H, r.cfg.bits, r.cfg.ecc, r.cfg.ver);
+            if (L) { take(e, { W: o.W, H: o.H, A: o.A, rot: r.rot, L, prevHash: new Map() }, r.Hm); break; }
+          }
+        }
+      };
+      cheap();
+      // 2: full searches, smallest quad first, within a time budget (they cost the most when nothing reads)
+      const until = Date.now() + (this.still ? 800 : 60);
+      let searches = 0;
+      for (const e of quads) {
+        if (codes.length >= 12) break;
+        if (!free(e)) continue;
+        if (searches >= 2 && Date.now() > until) break;
+        searches++;
+        const an = anchorsOf(e), lk = this.search(img, an);
+        const Hm = lk && this.homographyFor(an, lk.rot, lk.W, lk.H, lk.A);
+        if (!Hm) continue;
+        lk.prevHash = new Map();
+        take(e, lk, Hm);
+        known.push(lk);
+        cheap(); // its neighbours are usually the same size
+      }
+      if (!codes.length) { this.multi = null; return null; }
+      const out = [], quadsOut = [], marks = [], states = [];
+      let cellSum = 0;
+      for (const cd of codes) {
+        const ci = { anchors: 4, locked: false, blocks: 0, ok: 0, dup: 0, failed: 0, fixed: 0, marks: 0, cellPx: 0, ms: 0, size: info.size };
+        this.readCode(img, cd.lk, cd.Hm, this.anchorLevels(img, cd.an), ci, out, cd.lk.prevHash);
+        for (const k of ['blocks', 'ok', 'dup', 'failed', 'fixed', 'marks']) info[k] += ci[k];
+        quadsOut.push(ci.quad); marks.push(ci.markPts); states.push(ci.blockState);
+        cellSum += ci.cellPx;
+        if (!info.locked) {
+          Object.assign(info, { locked: true, grid: ci.grid, W: ci.W, H: ci.H, colours: ci.colours, ecc: ci.ecc, quad: ci.quad, sepRatio: ci.sepRatio, black: ci.black, white: ci.white });
+          info.anchorPts = cd.an.flatMap((a) => [a.x, a.y]);
+        }
+      }
+      info.anchors = 4 * codes.length;
+      info.codes = codes.length;
+      info.cellPx = Math.round((cellSum / codes.length) * 10) / 10;
+      info.quads = quadsOut;
+      const join = (parts, T) => { const o = new T(parts.reduce((n, p) => n + p.length, 0)); let k = 0; for (const p of parts) { o.set(p, k); k += p.length; } return o; };
+      info.markPts = join(marks, Float32Array);
+      info.blockState = join(states, Uint8Array);
+      if (codes.length > 1) {
+        this.multi = { codes: codes.map(({ lk, cx, cy, size }) => ({ lk, cx, cy, size })) };
+        this.lock = null; this.lastAnchors = null;
+      } else {
+        // one whole code (with stray anchors of others): carry on with the one-code tracker
+        const c0 = codes[0];
+        this.multi = null;
+        this.lock = c0.lk; this.prevHash = c0.lk.prevHash; this.lastAnchors = c0.an;
+        c0.lk.cfgMiss = 0; c0.lk.tl = { x: c0.an[c0.lk.rot].x, y: c0.an[c0.lk.rot].y };
+      }
+      info.ms = Date.now() - t0;
+      return { blocks: out, info };
+    }
+    /** Read every block of one code, given its lock (size, layout, turn) and homography. */
+    readCode(img, lk, Hm, lv, info, out, prevHash) {
+      const { w, h, Y, ys } = img;
+      const mid = (lv.black + lv.white) / 2;
       const L = lk.L;
       const W = L.W;
       info.locked = true;
@@ -8457,7 +9248,7 @@ pako/dist/pako.esm.mjs:
         const wh = B.white;
         let hsh = 2166136261;
         for (let i = 0; i < L.n; i++) { cw[i] ^= wh[i]; hsh = Math.imul(hsh ^ cw[i], 16777619); }
-        if (this.prevHash.get(b) === hsh) { info.dup++; state[b] = 2; continue; }
+        if (prevHash.get(b) === hsh) { info.dup++; state[b] = 2; continue; }
         let res = rsDecode(cw, L.p);
         if (!res) {
           // retry, treating the least certain bytes as erasures
@@ -8470,13 +9261,13 @@ pako/dist/pako.esm.mjs:
           const idx = [];
           for (let i = 0; i < L.n; i++) if (byteAmb[i] > 0.35) idx.push(i);
           idx.sort((a, c) => byteAmb[c] - byteAmb[a]);
-          if (idx.length) res = rsDecode(cw, L.p, idx.slice(0, L.p - 2));
+          if (idx.length) res = rsDecode(cw, L.p, idx.slice(0, L.p - ERASURE_SPARE));
           if (!res && idx.length > L.p / 2) res = rsDecode(cw, L.p, idx.slice(0, L.p >> 1));
         }
         if (!res) { info.failed++; continue; }
         const d = res.data;
         if (crc16(d, 198) !== ((d[198] << 8) | d[199])) { info.failed++; continue; }
-        this.prevHash.set(b, hsh);
+        prevHash.set(b, hsh);
         info.ok++;
         info.fixed += res.fixed;
         state[b] = 1;
@@ -8485,13 +9276,11 @@ pako/dist/pako.esm.mjs:
       info.markPts = markPts;
       info.blockState = state;
       lk.recentOk = info.ok > 0 || info.dup > 0 || (lk.recentOk && lk.cfgMiss < 3);
-      info.ms = Date.now() - t0;
-      return { blocks: out, info };
     }
   }
 
   const api = {
-    rsEncode, rsDecode, crc16, toBlock, toPacket, layout, gridFor, encodeFrame, toRGBA, findAnchors, homography, project,
+    rsEncode, rsDecode, crc16, toBlock, toPacket, layout, gridFor, gridForCell, slotGrid, composeSlots, slotPicture, SLOTS, encodeFrame, toRGBA, findAnchors, homography, project,
     imageFromRGBA, imageFromYUV, imageFromPlanes,
     GridDecoder, SweepReader, findMarks, buildLattices, PALETTES, PARITY, ECC_NAMES, DATA, PRESETS, anchorModule, VERSION,
   };
@@ -9151,8 +9940,8 @@ pako/dist/pako.esm.mjs:
    - Password: the packed file (name, type, content) is encrypted with AES-256-GCM; the key comes from the
      password through PBKDF2-SHA-256 with a random salt. Envelope: "BEAX" | version | iterations | salt | iv | ciphertext.
    - Export: a fixed set of grid frames (all chunks plus spare repair pieces), written as a PDF to print,
-     PNG images in a ZIP, or a self-running HTML slideshow for any screen.
-   - Import: reads those back (Beam PDFs, ZIPs, slideshows) or any photo or screenshot of a frame.
+     PNG images in a ZIP, a self-running HTML slideshow for any screen, or an animated GIF (1 to 9 codes a frame).
+   - Import: reads those back (Beam PDFs, ZIPs, slideshows, GIFs) or any photo or screenshot of a frame.
    Works in the page (self.BeamExport) and in Node (require). */
 (function (root) {
   'use strict';
@@ -9494,6 +10283,200 @@ pako/dist/pako.esm.mjs:
     return { w, h, rgba: paletteRGBA(unpackRows(raw, w, h, bpc, 1), w, h, pal) };
   }
 
+  // ------------------------------------------------------------------ animated GIF
+  // An animated GIF of the codes: plays in any browser, image viewer or chat app, in a loop. Indexed colour (the
+  // code's own colours, nothing in between), so squares stay crisp at 100%. Frame times are whole hundredths of a
+  // second: 1 to 50 frames a second (browsers slow anything faster down to 10).
+  const gifDelay = (fps) => Math.max(2, Math.round(100 / Math.max(1, Math.min(50, fps))));
+  /** LZW-compress one frame of colour indices (GIF flavour: variable code width up to 12 bits, sub-blocks). */
+  function gifLzw(data, minBits) {
+    const out = [], clear = 1 << minBits, eoi = clear + 1;
+    let blk = new Uint8Array(255), bl = 0, acc = 0, nb = 0;
+    const blocks = [];
+    const emit = (code, size) => {
+      acc |= code << nb; nb += size;
+      while (nb >= 8) {
+        blk[bl++] = acc & 255; acc >>>= 8; nb -= 8;
+        if (bl === 255) { blocks.push(blk); blk = new Uint8Array(255); bl = 0; }
+      }
+    };
+    // dictionary: (prefix code << 8 | next index) -> code, open addressing
+    const HS = 1 << 14, keys = new Int32Array(HS), vals = new Int16Array(HS);
+    let next, size;
+    const reset = () => { keys.fill(-1); next = eoi + 1; size = minBits + 1; };
+    reset();
+    emit(clear, size);
+    let prefix = data.length ? data[0] : 0;
+    for (let i = 1; i < data.length; i++) {
+      const c = data[i], key = (prefix << 8) | c;
+      let hsh = ((key * 2654435761) >>> 18) & (HS - 1);
+      for (;;) {
+        const k = keys[hsh];
+        if (k === key) { prefix = vals[hsh]; break; }
+        if (k === -1) {
+          emit(prefix, size);
+          if (next < 4096) {
+            keys[hsh] = key; vals[hsh] = next++;
+            if (next > 1 << size && size < 12) size++;
+          } else { emit(clear, size); reset(); }
+          prefix = c;
+          break;
+        }
+        hsh = (hsh + 1) & (HS - 1);
+      }
+    }
+    if (data.length) emit(prefix, size);
+    emit(eoi, size);
+    if (nb > 0) { blk[bl++] = acc & 255; if (bl === 255) { blocks.push(blk); blk = new Uint8Array(255); bl = 0; } }
+    if (bl) blocks.push(blk.subarray(0, bl));
+    for (const b of blocks) { out.push(new Uint8Array([b.length]), b); }
+    out.push(new Uint8Array([0]));
+    return concat(out);
+  }
+  /** Start an animated GIF of w x h with this palette (up to 256 [r, g, b]); add(indices) per frame; done() -> bytes. */
+  function gifWriter(w, h, palette, fps) {
+    let bits = 1;
+    while (1 << bits < palette.length) bits++;
+    const parts = [], le = (v) => [v & 255, (v >> 8) & 255];
+    parts.push(latin1('GIF89a'), new Uint8Array([...le(w), ...le(h), 0xf0 | (bits - 1), 0, 0]));
+    const table = new Uint8Array(3 << bits);
+    palette.forEach(([r, g, b], i) => { table[i * 3] = r; table[i * 3 + 1] = g; table[i * 3 + 2] = b; });
+    parts.push(table);
+    parts.push(new Uint8Array([0x21, 0xff, 11, ...latin1('NETSCAPE2.0'), 3, 1, 0, 0, 0])); // loop for ever
+    const delay = gifDelay(fps), minBits = Math.max(2, bits);
+    return {
+      delay,
+      add(data) {
+        parts.push(new Uint8Array([0x21, 0xf9, 4, 0x04, ...le(delay), 0, 0])); // keep the frame until the next one
+        parts.push(new Uint8Array([0x2c, 0, 0, 0, 0, ...le(w), ...le(h), 0]));
+        parts.push(new Uint8Array([minBits]), gifLzw(data, minBits));
+      },
+      done() { parts.push(new Uint8Array([0x3b])); return new Blob(parts, { type: 'image/gif' }); },
+    };
+  }
+  /** A picture of codes for a GIF frame: cells (colour indices) scaled `cell` times, centred on a white w x h. */
+  function gifFrame(cells, cw, ch, cell, w, h, white) {
+    const out = new Uint8Array(w * h).fill(white);
+    const ox = Math.max(0, Math.floor((w - cw * cell) / 2)), oy = Math.max(0, Math.floor((h - ch * cell) / 2));
+    const row = new Uint8Array(cw * cell);
+    for (let y = 0; y < ch; y++) {
+      for (let x = 0; x < cw; x++) row.fill(cells[y * cw + x], x * cell, (x + 1) * cell);
+      for (let k = 0; k < cell; k++) {
+        const o = (oy + y * cell + k) * w + ox;
+        if (o + row.length <= out.length) out.set(row.subarray(0, Math.min(row.length, w - ox)), o);
+      }
+    }
+    return out;
+  }
+  /** An animated GIF's frames, one at a time, as RGBA (each drawn over the last, as a viewer shows them):
+      { w, h, count, next() -> { w, h, rgba } or null }. Only one frame's pixels are held at a time. */
+  function gifReader(bytes) {
+    const b = bytes, n = b.length;
+    if (!isGif(b) || n < 13) return null;
+    const w = b[6] | (b[7] << 8), h = b[8] | (b[9] << 8);
+    let p0 = 13, gct = null;
+    if (b[10] & 0x80) { const size = 3 << ((b[10] & 7) + 1); gct = b.subarray(p0, p0 + size); p0 += size; }
+    // a first pass over the blocks: where each frame is, and its control extension
+    const frames = [];
+    let p = p0, gce = null;
+    while (p < n) {
+      const t = b[p++];
+      if (t === 0x3b) break;
+      if (t === 0x21) {
+        const label = b[p++];
+        if (label === 0xf9 && b[p] >= 4) gce = { dispose: (b[p + 1] >> 2) & 7, transp: b[p + 1] & 1 ? b[p + 4] : -1 };
+        while (p < n && b[p]) p += b[p] + 1;
+        p++;
+        continue;
+      }
+      if (t !== 0x2c) break;
+      const at = p, fl = b[p + 8];
+      p += 9;
+      if (fl & 0x80) p += 3 << ((fl & 7) + 1);
+      p++; // LZW code size
+      while (p < n && b[p]) p += b[p] + 1;
+      p++;
+      frames.push({ at, gce });
+      gce = null;
+    }
+    const canvas = new Uint8ClampedArray(w * h * 4).fill(255);
+    let i = 0;
+    return {
+      w, h, count: frames.length,
+      next() {
+        if (i >= frames.length) return null;
+        const { at, gce: g } = frames[i++], transp = g ? g.transp : -1, dispose = g ? g.dispose : 0;
+        let q = at;
+        const fx = b[q] | (b[q + 1] << 8), fy = b[q + 2] | (b[q + 3] << 8), fw = b[q + 4] | (b[q + 5] << 8), fh = b[q + 6] | (b[q + 7] << 8), fl = b[q + 8];
+        q += 9;
+        let ct = gct;
+        if (fl & 0x80) { const size = 3 << ((fl & 7) + 1); ct = b.subarray(q, q + size); q += size; }
+        const minBits = b[q++], chunks = [];
+        while (q < n && b[q]) { chunks.push(b.subarray(q + 1, q + 1 + b[q])); q += b[q] + 1; }
+        const idx = gifUnlzw(concat(chunks), minBits, fw * fh);
+        const inter = fl & 0x40, rows = [];
+        if (inter) { for (const [s0, st] of [[0, 8], [4, 8], [2, 4], [1, 2]]) for (let y = s0; y < fh; y += st) rows.push(y); }
+        const before = dispose === 3 ? canvas.slice() : null;
+        for (let r = 0; r < fh; r++) {
+          const y = fy + (inter ? rows[r] : r);
+          if (y >= h) continue;
+          for (let x = 0; x < fw; x++) {
+            const c = idx[r * fw + x];
+            if (c === transp || !ct || fx + x >= w) continue;
+            const o = (y * w + fx + x) * 4;
+            canvas[o] = ct[c * 3]; canvas[o + 1] = ct[c * 3 + 1]; canvas[o + 2] = ct[c * 3 + 2]; canvas[o + 3] = 255;
+          }
+        }
+        const out = { w, h, rgba: canvas.slice() };
+        if (dispose === 2) for (let y = fy; y < Math.min(h, fy + fh); y++) canvas.fill(255, (y * w + fx) * 4, (y * w + Math.min(w, fx + fw)) * 4);
+        else if (before) canvas.set(before);
+        return out;
+      },
+    };
+  }
+  /** Every frame of an animated GIF as RGBA (for tests and small files). */
+  function gifFrames(bytes) {
+    const r = gifReader(bytes), out = [];
+    if (!r) return out;
+    for (let f; (f = r.next());) out.push(f);
+    return out;
+  }
+  function gifUnlzw(data, minBits, count) {
+    const out = new Uint8Array(count), clear = 1 << minBits, eoi = clear + 1;
+    const pre = new Int16Array(4096), suf = new Uint8Array(4096), len = new Uint16Array(4096);
+    let size = minBits + 1, next = eoi + 1, prev = -1, o = 0, acc = 0, nb = 0, p = 0;
+    for (let i = 0; i < clear; i++) { suf[i] = i; len[i] = 1; pre[i] = -1; }
+    const stack = new Uint8Array(4097);
+    while (o < count) {
+      while (nb < size && p < data.length) { acc |= data[p++] << nb; nb += 8; }
+      if (nb < size) break;
+      const code = acc & ((1 << size) - 1);
+      acc >>>= size; nb -= size;
+      if (code === clear) { size = minBits + 1; next = eoi + 1; prev = -1; continue; }
+      if (code === eoi) break;
+      let c = code, first;
+      if (c < next) {
+        let sp = 0;
+        for (let x = c; x >= 0; x = pre[x]) stack[sp++] = suf[x];
+        first = stack[sp - 1];
+        while (sp && o < count) out[o++] = stack[--sp];
+      } else if (c === next && prev >= 0) {
+        let sp = 0;
+        for (let x = prev; x >= 0; x = pre[x]) stack[sp++] = suf[x];
+        first = stack[sp - 1];
+        while (sp && o < count) out[o++] = stack[--sp];
+        if (o < count) out[o++] = first;
+      } else break;
+      if (prev >= 0 && next < 4096) {
+        pre[next] = prev; suf[next] = first; len[next] = len[prev] + 1; next++;
+        if (next === 1 << size && size < 12) size++;
+      }
+      prev = c;
+    }
+    return out;
+  }
+  const isGif = (b) => b && b.length > 6 && b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38;
+
   // ------------------------------------------------------------------ HTML slideshow
   function b64(bytes) {
     let s = '';
@@ -9541,7 +10524,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
 
   const api = {
     deflate, inflate, encrypt, decrypt, isEncrypted, exportPlan, countFrames, exportFrames, compose, quietFor, png, readPng, zip, unzip, pdf, pdfImages, pageGrid, pageLayout, PAGES, TILES,
-    slideshow, slideshowImages,
+    slideshow, slideshowImages, gifWriter, gifFrame, gifReader, gifFrames, gifDelay, isGif,
   };
   root.BeamExport = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
@@ -9572,7 +10555,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   }
   const PREF_KEY = 'beam.prefs.v1';
   const prefs = Object.assign({
-    mode: 'grid', gDensity: 288, gColours: 4, gEcc: 'M', gfps: 15,
+    mode: 'grid', gDensity: 288, gColours: 4, gEcc: 'M', gfps: 15, gSlots: 1,
     fps: 10, density: 6, ecl: 'L', tiles: 1, decoder: 'auto', facing: 'environment', camRes: 'hd', camFps: 'max', autoZoom: true,
   }, (() => {
     try { return JSON.parse(localStorage.getItem(PREF_KEY)) || {}; } catch { return {}; }
@@ -9685,16 +10668,18 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   const speedKey = () => (isGrid() ? 'gfps' : 'fps');
   const curFps = () => prefs[speedKey()];
   if (!G.PRESETS.includes(prefs.gDensity)) prefs.gDensity = 288;
-  /** Grid that fits a drawing area given in device pixels, or null if it is too small. */
-  function gridGeom(wPx, hPx) {
-    const g = G.gridFor(wPx, hPx, prefs.gDensity);
-    const L = G.layout(g.W, g.H, gBits(), GECC[prefs.gEcc] ?? 1);
-    return L && L.blocks.length ? { ...g, L } : null;
+  // codes side by side on the sender's screen (each with the squares one code would have at this density)
+  const gSlots = () => (G.SLOTS.includes(prefs.gSlots) ? prefs.gSlots : 1);
+  /** The grid (or grids) that fit a drawing area given in device pixels, or null if too small. W x H: one code;
+      blocks: all codes; cw x ch: the whole picture in cells, quiet zones included. */
+  function gridGeom(wPx, hPx, slots = gSlots()) {
+    return G.slotGrid(wPx, hPx, prefs.gDensity, slots, gBits(), GECC[prefs.gEcc] ?? 1);
   }
-  function stageGeom() {
+  function stageGeom(slots) {
     const st = $('stage'), dpr = window.devicePixelRatio || 1;
-    return gridGeom(Math.max(64, st.clientWidth - 8) * dpr, Math.max(64, st.clientHeight - 8) * dpr);
+    return gridGeom(Math.max(64, st.clientWidth - 8) * dpr, Math.max(64, st.clientHeight - 8) * dpr, slots);
   }
+  const stageGeom1 = () => stageGeom(1);
   function fullGeom() {
     const dpr = window.devicePixelRatio || 1;
     return gridGeom(window.innerWidth * dpr, window.innerHeight * dpr);
@@ -9761,7 +10746,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (!prepared) return;
     if (isGrid()) {
       const g = fullGeom();
-      const per = g ? g.L.blocks.length : 1;
+      const per = g ? g.blocks : 1;
       const frames = codesNeeded(prepared.payload.length, per);
       const secs = frames / prefs.gfps;
       let info = fmtBytes(prepared.originalSize);
@@ -10143,22 +11128,23 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       const T = tx.test;
       const st = {
         step: T.auto ? T.i : T.step, steps: T.auto ? T.steps.length : 0, loop: T.auto ? T.loop : 0, phase: T.auto ? T.steps[T.i].phase : 0,
-        fps: prefs.gfps, colours: prefs.gColours, ecc: prefs.gEcc, across: prefs.gDensity, W: g.W, H: g.H, blocks: g.L.blocks.length,
+        fps: prefs.gfps, colours: prefs.gColours, ecc: prefs.gEcc, across: prefs.gDensity, W: g.W, H: g.H, blocks: g.blocks,
         actualFps: tx.rate || prefs.gfps, frame: tx.frameNo,
       };
-      for (let i = 0; i < g.L.blocks.length; i++) packets.push(makeTestPacket(T, T.seq++, st).buffer);
+      for (let i = 0; i < g.blocks; i++) packets.push(makeTestPacket(T, T.seq++, st).buffer);
     } else {
-      for (let i = 0; i < g.L.blocks.length; i++) packets.push(tx.sender.nextFrame(1).buffer);
+      for (let i = 0; i < g.blocks; i++) packets.push(tx.sender.nextFrame(1).buffer);
     }
-    return { kind: 'grid', seq: tx.frameNo - 1, W: g.W, H: g.H, cell: g.cell, quiet: g.quiet, bits: g.L.bits, ecc: g.L.ecc, blocks: g.L.blocks.length, packets, gen: tx.gen };
+    return { kind: 'grid', seq: tx.frameNo - 1, W: g.W, H: g.H, cell: g.cell, quiet: g.quiet, bits: g.L.bits, ecc: g.L.ecc, blocks: g.blocks, k: g.k, cols: g.cols, rows: g.rows, packets, gen: tx.gen };
   }
   function buildGridFrame() {
     const job = gridJob();
     if (!job) return null;
-    const L = G.layout(job.W, job.H, job.bits, job.ecc);
-    const px = G.toRGBA(L, G.encodeFrame(L, job.packets.map((b) => G.toBlock(new Uint8Array(b))), job.seq));
+    const r = G.slotPicture(job, job.packets, job.seq);
     job.packets = null;
-    job.img = new ImageData(new Uint8ClampedArray(px.buffer), job.W, job.H);
+    job.W = r.w; job.H = r.h;
+    if (job.k > 1) job.quiet = 0; // the picture has its quiet zones
+    job.img = new ImageData(new Uint8ClampedArray(r.px.buffer), r.w, r.h);
     return job;
   }
   function pumpEncoders() {
@@ -10171,7 +11157,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       tx.pending.set(job.id, job);
       const w = tx.workers[job.id % tx.workers.length];
       if (job.kind === 'grid') {
-        w.postMessage({ kind: 'grid', id: job.id, W: job.W, H: job.H, bits: job.bits, ecc: job.ecc, packets: job.packets, seed: job.id }, job.packets);
+        w.postMessage({ kind: 'grid', id: job.id, W: job.W, H: job.H, bits: job.bits, ecc: job.ecc, k: job.k, cols: job.cols, rows: job.rows, quiet: job.quiet, packets: job.packets, seed: job.id }, job.packets);
         job.packets = null;
       } else {
         w.postMessage({ id: job.id, texts: job.texts, ecl: job.ecl, cols: job.cols, rows: job.rows });
@@ -10187,6 +11173,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     tx.pending.delete(m.id);
     if (m.error) { job.skip = true; tx.ready.set(m.id, job); return; }
     job.W = m.W; job.H = m.H;
+    if (job.kind === 'grid' && job.k > 1) job.quiet = 0; // the picture has its quiet zones
     job.img = new ImageData(new Uint8ClampedArray(m.buf), m.W, m.H);
     tx.ready.set(m.id, job);
   }
@@ -10291,7 +11278,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   function updateGridStats() {
     const f = tx.cur;
     const g = stageGeom();
-    const per = g ? g.L.blocks.length : 0;
+    const per = g ? g.blocks : 0;
     $('stCodeL').textContent = 'Frame';
     $('stQrL').textContent = 'Blocks';
     if (f && f.kind === 'grid') {
@@ -10308,8 +11295,14 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     $('gdensity').max = G.PRESETS.length - 1;
     $('gdensity').value = di;
     $('gdensityVal').textContent = g
-      ? `Density ${prefs.gDensity}: ${g.W}×${g.H} cells, ${g.cell} px each, ${fmtBytes(per * C.BLOCK)} per frame`
-      : 'Too dense for this screen. Lower the density or enlarge the window.';
+      ? `Density ${prefs.gDensity}: ${g.k > 1 ? `${g.k} codes of ` : ''}${g.W}×${g.H} cells, ${g.cell} px each, ${fmtBytes(per * C.BLOCK)} per frame`
+      : gSlots() > 1 ? `${gSlots()} codes don’t fit at this density: raise the density or choose fewer codes.` : 'Too dense for this screen. Lower the density or enlarge the window.';
+    for (const b of $('gslots').querySelectorAll('button')) b.setAttribute('aria-pressed', String(Number(b.dataset.slots) === gSlots()));
+    // the same squares in one code always carry more: say how much each choice gives up
+    const one = gSlots() > 1 ? stageGeom1() : null;
+    $('gslotsVal').textContent = gSlots() === 1
+      ? 'One code fills the screen: the most data per frame. Codes side by side carry less, at the same square size.'
+      : g && one ? `${g.k} codes side by side: ${fmtBytes(g.blocks * C.BLOCK)} a frame, ${g.blocks >= one.blocks ? 'about the same as' : `${Math.round((1 - g.blocks / one.blocks) * 100)}% less than`} one code (${fmtBytes(one.blocks * C.BLOCK)}). Squares are the same size, so they read the same.` : '';
     for (const b of $('gcolours').querySelectorAll('button')) b.setAttribute('aria-pressed', String(Number(b.dataset.colours) === prefs.gColours));
     $('gcoloursVal').textContent = COLOUR_NOTES[prefs.gColours] || '';
     for (const b of $('gecc').querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.gecc === prefs.gEcc));
@@ -10319,10 +11312,10 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (!prepared) return;
     const frames = per ? codesNeeded(prepared.payload.length, per) : 0;
     const full = fullGeom();
-    const bigger = full && per && full.L.blocks.length > per * 1.15 && !$('send').classList.contains('bare');
+    const bigger = full && per && full.blocks > per * 1.15 && !$('send').classList.contains('bare');
     $('est').innerHTML = per
       ? `The receiver needs about <b>${frames.toLocaleString()} frames</b>, any of them, in any order: <b>${fmtTime(frames / prefs.gfps)}</b> if it reads every one.` +
-        (bigger ? ` <b>Hide controls</b> for ${Math.round((full.L.blocks.length / per - 1) * 100)}% more data per frame.` : '')
+        (bigger ? ` <b>Hide controls</b> for ${Math.round((full.blocks / per - 1) * 100)}% more data per frame.` : '')
       : '';
   }
   function updateSendStats() {
@@ -10518,6 +11511,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   }));
   $('mode').addEventListener('click', (e) => { const b = e.target.closest('[data-mode]'); if (b) { setSetting('mode', b.dataset.mode); layoutKey = ''; } });
   $('gcolours').addEventListener('click', (e) => { const b = e.target.closest('[data-colours]'); if (b) setSetting('gColours', Number(b.dataset.colours)); });
+  $('gslots').addEventListener('click', (e) => { const b = e.target.closest('[data-slots]'); if (b) { setSetting('gSlots', Number(b.dataset.slots)); layoutKey = ''; } });
   $('gecc').addEventListener('click', (e) => { const b = e.target.closest('[data-gecc]'); if (b) setSetting('gEcc', b.dataset.gecc); });
   $('ecl').addEventListener('click', (e) => { const b = e.target.closest('[data-ecl]'); if (b) setSetting('ecl', b.dataset.ecl); });
   $('tiles').addEventListener('click', (e) => { const b = e.target.closest('[data-tiles]'); if (b) { setSetting('tiles', Number(b.dataset.tiles)); layoutKey = ''; } });
@@ -11282,7 +12276,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (inf.locked && inf.quad) {
       const tot = inf.ok + inf.failed;
       const rate = tot ? inf.ok / tot : inf.dup ? 1 : 0;
-      poly(inf.quad, rate >= 0.8 ? '#7fd1a3' : rate >= 0.3 ? '#e8c46a' : '#ef7d6d', 3);
+      for (const qd of inf.quads || [inf.quad]) poly(qd, rate >= 0.8 ? '#7fd1a3' : rate >= 0.3 ? '#e8c46a' : '#ef7d6d', 3); // every code in view
       if (inf.markPts && inf.blockState) {
         const r = Math.max(3, Math.min(6, sc * 4)) * dpr;
         for (let i = 0; i < inf.blockState.length; i++) {
@@ -11446,7 +12440,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const ms = rx.decodeMs.length ? rx.decodeMs.reduce((a, b) => a + b, 0) / rx.decodeMs.length : 0;
     const gl = rx.gridLog;
     let gOk = 0, gFail = 0, gFixed = 0, gAnchors = 0, gLocked = 0;
-    for (const x of gl) { gOk += x[1]; gFail += x[2]; gFixed += x[3]; if (x[5] === 4) gAnchors++; if (x[6]) gLocked++; }
+    for (const x of gl) { gOk += x[1]; gFail += x[2]; gFixed += x[3]; if (x[5] >= 4) gAnchors++; if (x[6]) gLocked++; }
     const gi = rx.gridInfo || {};
     window.__beamDebug = {
       reader: rx.decoder && rx.decoder.name, decodeMs: Math.round(ms), readsPerSec, caught, senderRate, tiles: tl, camFps, decFps, dropped: rx.dropped,
@@ -11739,13 +12733,13 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   function assistCamera(now, gi, gOk, gFail) {
     const A = rx.assist || (rx.assist = { since: 0, lastSeen: 0, zoomAt: -Infinity, photoAt: -Infinity, photoFails: 0, noPhoto: false, hi: false, struggling: false });
     const fresh = gi && gi.size && now - (rx.gridAt || 0) < 1200;
-    const seen = !!fresh && ((gi.sweep && gi.marks >= 4) || gi.anchors === 4);
+    const seen = !!fresh && ((gi.sweep && gi.marks >= 4) || gi.anchors >= 4); // 4 corners a code, several codes possible
     if (seen) A.lastSeen = now;
     // only while nothing new arrives, and only for squares measured too small (or corners found whose code can't
     // be read): failures alone are usually focus, glare or movement, which neither zoom nor photos fix
     const moving = now - (rx.lastNew || -Infinity) < 2500;
     const small = gi.cellPx > 0 && gi.cellPx < (gi.locked ? 4.2 : 5.4);
-    const stuck = gi.anchors === 4 && !gi.locked; // corners found, but the grid inside can't be read
+    const stuck = gi.anchors >= 4 && !gi.locked; // corners found, but the grid inside can't be read
     A.struggling = seen && !moving && (small || stuck) && !rx.test;
     if (!A.struggling) A.since = 0; else if (!A.since) A.since = now;
     A.offCentre = false;
@@ -11920,7 +12914,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     t.className = '';
     if (green && !red) { t.textContent = `Photo: read all ${green} parts.`; t.className = 'ok'; }
     else if (green) { t.textContent = `Photo: read ${green} of ${green + red} parts. Red ones didn’t read: take a closer photo of them.`; t.className = 'bad'; }
-    else if ((info.marks || 0) >= 4 || info.anchors === 4) { t.textContent = `Photo: found the code, but its squares are too small or blurry${info.cellPx ? ` (${info.cellPx} px)` : ''}. Take a closer photo of part of it.`; t.className = 'bad'; }
+    else if ((info.marks || 0) >= 4 || info.anchors >= 4) { t.textContent = `Photo: found the code, but its squares are too small or blurry${info.cellPx ? ` (${info.cellPx} px)` : ''}. Take a closer photo of part of it.`; t.className = 'bad'; }
     else { t.textContent = 'Photo: no Beam code found. Point at the code and keep it in focus.'; t.className = 'bad'; }
     $('pCard').hidden = false;
   }
@@ -12393,12 +13387,15 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     pdf: { dens: 256, colours: 4, ecc: 'H', extra: 0.25 },
     png: { dens: 288, colours: 4, ecc: 'M', extra: 0.25, fps: 10 },
     html: { dens: 288, colours: 4, ecc: 'M', extra: 0.25, fps: 10 },
+    gif: { dens: 256, colours: 4, ecc: 'M', extra: 0.25, fps: 8 },
   };
   // format, paper and shape are shared; density, colours, error correction, spares and speed are kept per format
   const X_KEYS = ['dens', 'colours', 'ecc', 'extra', 'fps'];
   const xf = Object.assign({}, prefs.xf || {});
-  const xs = Object.assign({ format: 'pdf', page: LETTER ? 'ltrl' : 'a4l', shape: 'wide', tiles: 1, fps: 10 }, prefs.x || {});
+  const xs = Object.assign({ format: 'pdf', page: LETTER ? 'ltrl' : 'a4l', shape: 'wide', tiles: 1, fps: 10, gsize: 1280, slots: 1 }, prefs.x || {});
   if (![1, 4, 9].includes(xs.tiles)) xs.tiles = 1;
+  if (![960, 1280, 1920].includes(xs.gsize)) xs.gsize = 1280;
+  if (!G.SLOTS.includes(xs.slots)) xs.slots = 1;
   if (!X_SUGGEST[xs.format]) xs.format = 'pdf';
   function xLoad(format) {
     Object.assign(xs, { fps: 10 }, X_SUGGEST[format], xf[format] || {});
@@ -12408,20 +13405,28 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   }
   function xKeep() { xf[xs.format] = Object.fromEntries(X_KEYS.map((k) => [k, xs[k]])); }
   const SHAPES = { wide: [1920, 1080], tall: [1080, 1920], square: [1440, 1440] };
+  // a GIF's pixel size: its long side, in the chosen shape
+  const gifDims = () => { const [w, h] = SHAPES[xs.shape] || SHAPES.wide, s = xs.gsize / Math.max(w, h); return [Math.round(w * s), Math.round(h * s)]; };
   const X_BITS = { 2: 1, 4: 2, 8: 3 };
   let xJob = null;
   xLoad(xs.format);
   function xGrid() {
     if (xs.format === 'pdf') { const g = X.pageGrid(xs.page, xs.dens, xs.tiles); return { W: g.W, H: g.H, page: g }; }
+    if (xs.format === 'gif') {
+      // 1 to 9 codes a frame, each with the squares one code would have in this GIF at this density
+      const [w, h] = gifDims(), sg = G.slotGrid(w, h, xs.dens, xs.slots, X_BITS[xs.colours], GECC[xs.ecc]);
+      return sg ? { W: sg.W, H: sg.H, sg, w, h } : null;
+    }
     const [w, h] = SHAPES[xs.shape] || SHAPES.wide;
     const g = G.gridFor(w * 10, h * 10, xs.dens); // a large virtual canvas, so the grid follows the density closely
     return { W: g.W, H: g.H };
   }
   const xPayloadLen = () => (prepared ? prepared.payload.length + (password ? 53 : 0) : 0);
-  // codes per output unit: a page holds 1, 4 or 9 codes; an image or slideshow frame holds one
-  const xT = () => (xs.format === 'pdf' ? xs.tiles : 1);
+  // codes per output unit: a page holds 1, 4 or 9 codes, a GIF frame 1 to 9; an image or slideshow frame holds one
+  const xT = () => { if (xs.format === 'pdf') return xs.tiles; if (xs.format !== 'gif') return 1; const g = xGrid(); return g ? g.sg.k : 1; };
   function xPlan() {
     const g = xGrid();
+    if (!g) return null;
     const c = X.countFrames(xPayloadLen(), g.W, g.H, X_BITS[xs.colours], GECC[xs.ecc], xs.extra);
     if (!c) return null;
     // pages (or images or frames), and how many of them are enough: pieces needed are the chunks plus ten
@@ -12437,28 +13442,42 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     pressed('xFormat', 'f', xs.format);
     pressed('xPage', 'p', xs.page);
     pressed('xShape', 's', xs.shape);
+    pressed('xGsize', 'gs', xs.gsize);
+    pressed('xSlots', 'sl', xs.slots);
     pressed('xColours', 'c', xs.colours);
     pressed('xEcc', 'e', xs.ecc);
     pressed('xExtra', 'x2', xs.extra);
     for (const r of $('xBody').querySelectorAll('[data-x]')) r.hidden = !r.dataset.x.split(' ').includes(xs.format);
     $('xFps').textContent = `${xs.fps} frames a second`;
+    const gd = X.gifDelay(xs.fps);
+    $('xFpsNote').textContent = xs.format === 'gif' ? (100 / gd === xs.fps ? 'GIF frame times are whole hundredths of a second.' : `GIF frame times are whole hundredths of a second: it plays at ${(100 / gd).toFixed(1)} a second.`) + ' Most phones keep up with 8 to 15.' : '';
     $('xFormatNote').textContent = {
       pdf: 'One code per page. Print it, then scan the pages with Receive, or photograph them and use Import.',
       png: 'One image per code, in a ZIP. Show them on any screen, or send them to someone with Beam.',
       html: 'One page that plays the codes in a loop. Open it on any computer or TV, in full screen.',
+      gif: 'An animated GIF that loops: it plays in any browser, photo viewer or chat. Show it at its own size or bigger. Chat apps may turn GIFs into blurry videos: send it as a file. Import reads it too.',
     }[xs.format];
     const plan = xPlan();
     const box = $('xCountBox');
     if (!plan) {
       $('xDens').textContent = String(xs.dens);
       $('xCount').textContent = '–'; $('xCountL').textContent = '';
-      $('xCountNote').textContent = 'These settings don’t fit. Choose a higher density.';
+      $('xCountNote').textContent = xs.format === 'gif' && xs.slots > 1
+        ? `${xs.slots} codes don’t fit in this GIF: each needs at least about 110 squares across. Choose fewer codes, a bigger GIF or a higher density.`
+        : 'These settings don’t fit. Choose a higher density.';
       box.classList.add('bad');
       $('xGo').disabled = true;
       return;
     }
     const { L, g, T } = plan, n = plan.units, need = plan.needUnits;
     $('xDens').textContent = `${xs.dens}: ${L.W} × ${L.H} squares` + (T > 1 ? ` per code` : '');
+    if (xs.format === 'gif') {
+      const sg = g.sg, one = xs.slots > 1 ? G.slotGrid(g.w, g.h, xs.dens, 1, X_BITS[xs.colours], GECC[xs.ecc]) : null;
+      $('xGsizeNote').textContent = `${g.w} × ${g.h} pixels a frame. A bigger GIF has bigger squares at the same density, and a bigger file.`;
+      $('xSlotsNote').textContent = sg.k === 1
+        ? 'One code fills the frame: the most data per frame.'
+        : `${sg.k} codes side by side (${sg.cols} × ${sg.rows}), ${fmtBytes(sg.blocks * C.BLOCK)} a frame` + (one ? `: ${one.blocks > sg.blocks ? `${Math.round((1 - sg.blocks / one.blocks) * 100)}% less than one code (${fmtBytes(one.blocks * C.BLOCK)})` : 'about the same as one code'}. The squares stay the same size.` : '.');
+    }
     pressed('xTiles', 't', xs.tiles);
     const q = X.quietFor(L);
     if (xs.format === 'pdf') {
@@ -12479,6 +13498,16 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
         ? `${T} separate codes per page, each with its own corner squares: zoom in on one at a time, or sweep across them all.` + (few ? ' Black and white codes can’t be swept: read one whole code at a time.' : '')
         : 'One code per page.';
       $('xColNote').textContent = { 2: 'Black and white: for any printer, the most robust.', 4: 'Prints with the cyan, magenta, yellow and black inks. Needs a colour printer.', 8: 'The most data per page, but needs a good colour printer and even light.' }[xs.colours];
+    } else if (xs.format === 'gif') {
+      const c = g.sg.cell, [w, h] = [g.w, g.h];
+      const okD = G.PRESETS.filter((d) => { const s = G.slotGrid(w, h, d, xs.slots, X_BITS[xs.colours], GECC[xs.ecc]); return s && s.cell >= 4; });
+      const fix = okD.length ? `density ${Math.max(...okD)} or lower` : 'fewer codes per frame';
+      $('xDensNote').textContent = `Each square is ${c} pixels in the GIF. ` + (c >= 4
+        ? 'Shown at its own size or bigger, a phone camera reads it live.'
+        : c >= 3
+          ? `Show it bigger than its own size, or hold the phone close. For easy reading at this GIF size: ${fix}.`
+          : `Too small for a camera at its own size: show it enlarged without blurring, choose a bigger GIF size, or ${fix}. Fine for Import.`);
+      $('xColNote').textContent = { 2: 'Black and white: the most robust.', 4: 'The usual choice.', 8: 'The most data, needs a sharp camera close up.' }[xs.colours];
     } else {
       // shown full screen on a Full HD screen (landscape; a tall code on a phone held upright): pixels per square
       const screenPx = (dens) => {
@@ -12496,16 +13525,20 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
           : `On a Full HD screen each square is only ${px.toFixed(1)} pixels: too small for any camera, even zoomed in (the screen blurs the squares together). Fine for Import. For a camera, choose density ${best} or lower.`;
       $('xColNote').textContent = { 2: 'Black and white: the most robust.', 4: 'The usual choice.', 8: 'The most data, needs a sharp camera close up.' }[xs.colours];
     }
-    const unit = { pdf: ['page', 'pages'], png: ['image', 'images'], html: ['frame', 'frames'] }[xs.format];
+    const unit = { pdf: ['page', 'pages'], png: ['image', 'images'], html: ['frame', 'frames'], gif: ['frame', 'frames'] }[xs.format];
     $('xExtraNote').textContent = xs.extra
       ? `Extra repair pieces: any ${need} of the ${n} ${unit[1]} rebuild the file, so some can be lost, torn or unreadable.`
       : `No spare: every ${unit[0]} must be read.`;
     const per = (L.blocks.length * C.BLOCK * T) / 1024;
-    const est = ((L.W * L.H * L.bits) / 8) * { pdf: 2.0, png: 2.7, html: 1.4 }[xs.format] * plan.frames + (xs.format === 'html' ? 6000 : 2000);
+    // a GIF's size is measured on its first frame (preview); until then, a rough guess from its pixels
+    const est = xs.format === 'gif'
+      ? (xPrev.gifBytes && xPrev.gifKey === xKey() ? xPrev.gifBytes : g.w * g.h * 0.11) * n + 1000
+      : ((L.W * L.H * L.bits) / 8) * { pdf: 2.0, png: 2.7, html: 1.4 }[xs.format] * plan.frames + (xs.format === 'html' ? 6000 : 2000);
     $('xCount').textContent = n.toLocaleString();
     $('xCountL').textContent = n === 1 ? unit[0] : unit[1];
     let note = `${per.toFixed(1)} KB of the file per ${unit[0]}${T > 1 ? ` (${T} codes)` : ''}. ` + (n > 1 ? `Any ${need} are enough. ` : '');
     if (xs.format === 'html') note += `Loops every ${fmtTime(n / xs.fps)} at ${xs.fps} a second. `;
+    if (xs.format === 'gif') note += `Loops every ${fmtTime((n * gd) / 100)}. `;
     note += `About ${fmtBytes(est)}.`;
     const many = xs.format === 'pdf' ? n > 40 : n > 400;
     if (many) note += xs.format === 'pdf' ? ' That’s a lot of paper: raise the density or colours, lower the spare pieces, or reduce the file first.' : ' That’s a lot of frames: raise the density or colours.';
@@ -12528,7 +13561,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const plan = prepared && xPlan();
     el.hidden = !plan;
     if (!plan) return;
-    const what = { pdf: ['printed page', 'printed pages'], png: ['image', 'images'], html: ['slideshow frame', 'slideshow frames'] }[xs.format];
+    const what = { pdf: ['printed page', 'printed pages'], png: ['image', 'images'], html: ['slideshow frame', 'slideshow frames'], gif: ['GIF frame', 'GIF frames'] }[xs.format];
     el.innerHTML = `This file: <b>${plan.units.toLocaleString()} ${plan.units === 1 ? what[0] : what[1]}</b>${plan.T > 1 ? ` of ${plan.T} codes` : ''} at density ${xs.dens}, ${xs.colours} colours. Change it in Export.`;
   }
 
@@ -12538,7 +13571,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   const xPrev = { gen: 0, key: '', plan: null, frames: [], checks: [], payload: null, timer: 0, worker: null, enc: null };
   function xKey() {
     return JSON.stringify([prepared && prepared.payload && prepared.payload.length, prepared && prepared.mode, prepared && prepared.file.name, password,
-      xs.format, xs.format === 'pdf' ? xs.page + xs.tiles : xs.shape, xs.dens, xs.colours, xs.ecc, xs.extra]);
+      xs.format, xs.format === 'pdf' ? xs.page + xs.tiles : xs.format === 'gif' ? `${xs.shape}${xs.gsize}x${xs.slots}` : xs.shape, xs.dens, xs.colours, xs.ecc, xs.extra]);
   }
   // the encrypted payload is made once per password, so the preview and the export match
   async function xPayload() {
@@ -12580,6 +13613,18 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     cx.imageSmoothingEnabled = false;
     cx.fillStyle = '#fff';
     cx.fillRect(0, 0, cv.width, cv.height);
+    if (xs.format === 'gif') {
+      // the codes side by side, centred in the GIF frame, as the export draws them
+      const g = xGrid();
+      if (!g) return;
+      const sg = g.sg, k = cv.width / g.w, cs = sg.cell * k, tw = sg.W + 2 * sg.quiet, th = sg.H + 2 * sg.quiet;
+      const ox = ((g.w - sg.cw * sg.cell) / 2) * k, oy = ((g.h - sg.ch * sg.cell) / 2) * k;
+      fcs.forEach((fc, t) => {
+        const x = ox + ((t % sg.cols) * tw + sg.quiet) * cs, y = oy + (Math.floor(t / sg.cols) * th + sg.quiet) * cs;
+        cx.drawImage(fc, sg.quiet, sg.quiet, sg.W, sg.H, x, y, sg.W * cs, sg.H * cs);
+      });
+      return;
+    }
     if (xs.format !== 'pdf') { cx.drawImage(fcs[0], 0, 0, cv.width, cv.height); return; }
     // the same placement as the PDF writer: each code scaled into its place on the page
     const lay = X.pageLayout(xs.page, xs.tiles), { pw, ph } = lay, k = cv.width / pw;
@@ -12597,6 +13642,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   }
   function xAspect() {
     if (xs.format === 'pdf') { const [pw, ph] = X.PAGES[xs.page] || X.PAGES.a4l; return pw / ph; }
+    if (xs.format === 'gif') { const [w, h] = gifDims(); return w / h; }
     return null;
   }
   function xCaption(i, n, need) {
@@ -12612,13 +13658,14 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const g = xGrid();
     let plan;
     try { plan = X.exportPlan(payload, g.W, g.H, X_BITS[xs.colours], GECC[xs.ecc], xs.extra); } catch (e) { $('xPrevNote').textContent = ''; return; }
+    const gifKey = xKey();
     const cnt = xPlan();
     if (!cnt) return;
     const T = cnt.T;
     plan.units = cnt.units; plan.needUnits = cnt.needUnits; plan.T = T;
     xPrev.plan = plan; xPrev.payload = payload; xPrev.frames = []; xPrev.checks = [];
     const n = Math.min(PREVIEW_MAX, cnt.units);
-    const unit = { pdf: 'pages', png: 'images', html: 'frames' }[xs.format];
+    const unit = { pdf: 'pages', png: 'images', html: 'frames', gif: 'frames' }[xs.format];
     $('xPrevNote').textContent = (cnt.units > n ? `the first ${n} of ${cnt.units} ${unit}` : `all ${cnt.units} ${unit}`) + ' · tap one to look closely';
     const grid = $('xGrid');
     grid.innerHTML = '';
@@ -12645,6 +13692,14 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       const tw = (b.clientWidth || 110) * dpr;
       drawPreview(cv, fcs, tw, tw / ar, xCaption(i, cnt.units, cnt.needUnits));
       b.classList.remove('wait');
+      if (i === 0 && xs.format === 'gif' && g.sg) {
+        // the first frame, encoded as the export will: its size makes the file size estimate
+        const wr = X.gifWriter(g.w, g.h, plan.L.table, xs.fps);
+        wr.add(X.gifFrame(G.composeSlots(g.sg, xPrev.frames.slice(0, T)), g.sg.cw, g.sg.ch, g.sg.cell, g.w, g.h, plan.L.WHITE));
+        xPrev.gifBytes = (await wr.done().arrayBuffer()).byteLength - 800;
+        xPrev.gifKey = gifKey;
+        if (gen === xPrev.gen) renderExport();
+      }
       await new Promise((r) => setTimeout(r, 0));
     }
     // read the previewed codes back with the grid reader, as Import would (the first 25 codes)
@@ -12675,15 +13730,16 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const rgba = new Uint8ClampedArray(img.w * img.h * 4), px = new Uint32Array(rgba.buffer);
     const lut = L.table.map(([r, g, b]) => (0xff000000 | (b << 16) | (g << 8) | r) >>> 0);
     for (let i = 0; i < img.data.length; i++) px[i] = lut[img.data[i]];
+    const id = (xPrev.checkId = (xPrev.checkId || 0) + 1);
     return new Promise((resolve) => {
       const w = xPrev.worker;
       w.onmessage = (e) => {
-        if (e.data.type !== 'result') return;
+        if (e.data.type !== 'result' || e.data.id !== id) return; // an answer for an earlier preview
         const info = e.data.info || {};
         resolve({ ok: (e.data.packets || []).length, blocks: L.blocks.length, failed: info.failed || 0 });
       };
       w.postMessage({ type: 'reset' });
-      w.postMessage({ type: 'decode', buf: rgba.buffer, w: img.w, h: img.h }, [rgba.buffer]);
+      w.postMessage({ type: 'decode', buf: rgba.buffer, w: img.w, h: img.h, id }, [rgba.buffer]);
     });
   }
   function stopPreview() {
@@ -12704,7 +13760,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const plan = xPrev.plan, T = plan ? plan.T || 1 : 1;
     const fr = xPrev.frames.slice(lb.i * T, lb.i * T + T);
     if (!plan || fr.length < T) return;
-    const unit = { pdf: 'Page', png: 'Image', html: 'Frame' }[xs.format];
+    const unit = { pdf: 'Page', png: 'Image', html: 'Frame', gif: 'Frame' }[xs.format];
     $('lbTitle').textContent = `${unit} ${lb.i + 1} of ${plan.units}`;
     const st = $('lbStage'), dpr = window.devicePixelRatio || 1;
     const q = X.quietFor(plan.L), ar = xAspect() || (plan.L.W + 2 * q) / (plan.L.H + 2 * q);
@@ -12762,6 +13818,8 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   });
   $('xPage').addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b) xSet('page', b.dataset.p); });
   $('xShape').addEventListener('click', (e) => { const b = e.target.closest('[data-s]'); if (b) xSet('shape', b.dataset.s); });
+  $('xGsize').addEventListener('click', (e) => { const b = e.target.closest('[data-gs]'); if (b) xSet('gsize', Number(b.dataset.gs)); });
+  $('xSlots').addEventListener('click', (e) => { const b = e.target.closest('[data-sl]'); if (b) xSet('slots', Number(b.dataset.sl)); });
   $('xTiles').addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (b) xSet('tiles', Number(b.dataset.t)); });
   $('xColours').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (b) xSet('colours', Number(b.dataset.c)); });
   $('xEcc').addEventListener('click', (e) => { const b = e.target.closest('[data-e]'); if (b) xSet('ecc', b.dataset.e); });
@@ -12771,12 +13829,13 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (b.dataset.xstep === 'dens') {
       const i = G.PRESETS.indexOf(xs.dens);
       xSet('dens', G.PRESETS[Math.max(0, Math.min(G.PRESETS.length - 1, i + d))]);
-    } else xSet('fps', Math.max(1, Math.min(60, xs.fps + d)));
+    } else xSet('fps', Math.max(1, Math.min(xs.format === 'gif' ? 50 : 60, xs.fps + d)));
   }));
   $('xSuggest').addEventListener('click', () => { if (xEditable()) { Object.assign(xs, X_SUGGEST[xs.format]); renderExport(); } });
   $('xSender').addEventListener('click', () => {
     if (!xEditable()) return;
-    Object.assign(xs, { dens: G.PRESETS.includes(prefs.gDensity) ? prefs.gDensity : 288, colours: prefs.gColours, ecc: prefs.gEcc, fps: prefs.gfps });
+    Object.assign(xs, { dens: G.PRESETS.includes(prefs.gDensity) ? prefs.gDensity : 288, colours: prefs.gColours, ecc: prefs.gEcc, fps: xs.format === 'gif' ? Math.min(50, prefs.gfps) : prefs.gfps });
+    if (xs.format === 'gif') xs.slots = gSlots();
     renderExport();
   });
   function saveBlob(blob, name) {
@@ -12808,6 +13867,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       let plan, cached = [];
       if (xPrev.plan && xPrev.key === xKey()) { plan = xPrev.plan; cached = xPrev.frames.slice(); xPrev.gen++; }
       else { const g = xGrid(); plan = X.exportPlan(await xPayload(), g.W, g.H, X_BITS[xs.colours], GECC[xs.ecc], xs.extra); }
+      const gg = plan0.g;
       let served = 0;
       const nextFrame = () => (served < cached.length ? cached[served++] : (served++, plan.next()));
       const { L } = plan, T = plan0.T, n = plan0.units, need = plan0.needUnits;
@@ -12837,6 +13897,18 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
         job.files = files;
         blob = new Blob([X.zip(files)], { type: 'application/zip' });
         name = base + '-images.zip';
+      } else if (xs.format === 'gif') {
+        const sg = gg.sg, wr = X.gifWriter(gg.w, gg.h, L.table, xs.fps);
+        for (let i = 0; i < n; i++) {
+          const idxs = [];
+          for (let t = 0; t < T; t++) idxs.push(nextFrame());
+          wr.add(X.gifFrame(G.composeSlots(sg, idxs), sg.cw, sg.ch, sg.cell, gg.w, gg.h, L.WHITE));
+          at(i + 1, n);
+          await yieldUi();
+          if (job.cancelled) throw new Error('cancelled');
+        }
+        blob = wr.done();
+        name = base + '.gif';
       } else {
         const frames = [];
         for (let i = 0; i < n; i++) {
@@ -12851,7 +13923,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       }
       if (job.cancelled) return;
       xKeep();
-      prefs.x = { format: xs.format, page: xs.page, shape: xs.shape, tiles: xs.tiles };
+      prefs.x = { format: xs.format, page: xs.page, shape: xs.shape, tiles: xs.tiles, gsize: xs.gsize, slots: xs.slots };
       prefs.xf = { ...xf };
       savePrefs();
       job.blob = blob;
@@ -12907,7 +13979,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     else $('impStat').textContent = imp.images ? `No Beam codes found yet (${what}).` : 'Reading…';
     $('impHint').textContent = imp.running ? ''
       : imp.K ? 'Not enough yet. Add more pages or images (any you haven’t added).'
-        : 'Add Beam’s exported PDF, images or slideshow, or photos of the printed pages.';
+        : 'Add Beam’s exported PDF, images, slideshow or GIF, or photos of the printed pages.';
   }
   function closeImport() {
     if (imp) { imp.cancelled = true; imp.asm.terminate(); imp.worker.terminate(); }
@@ -12964,6 +14036,12 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       const entries = (await X.unzip(new Uint8Array(await f.arrayBuffer()))).filter((x) => isImageName(x.name) && !/(^|\/)(__MACOSX|\.)/.test(x.name));
       entries.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
       return entries.map((x) => ({ bytes: x.data, label: x.name.split('/').pop() }));
+    }
+    if (sig.startsWith('GIF8')) {
+      // an animated GIF (Beam's export, or a recording): every frame, read one at a time
+      const r = X.gifReader(new Uint8Array(await f.arrayBuffer()));
+      if (r && r.count > 1) return Array.from({ length: r.count }, (_, i) => ({ w: r.w, h: r.h, load: async () => r.next().rgba, label: `${name}, frame ${i + 1}` }));
+      return [{ blob: f, label: name }];
     }
     if (/\.html?$/i.test(name) || f.type === 'text/html') {
       const urls = X.slideshowImages(await f.text());
