@@ -11139,14 +11139,23 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     // the last code read is complete, yet nothing new arrives: another code (the next page) is in view
     if (got.every((v) => v)) got = new Uint8Array(m.per);
     if (!S.target || now - S.at > 15000) {
+      // choose only parts that can be brought to the middle with the code's four corners still in view (the ring
+      // needs them); a code that fills the view leaves no room to tilt
+      if (!(gi.locked && gi.quad && now - (rx.gridAt || 0) < 800 && gi.W === S.W && gi.H === S.H)) return;
       const fw = (gi.size && gi.size[0]) || 1920, fh = (gi.size && gi.size[1]) || 1080;
+      const q = gi.quad, mx = fw * 0.03, my = fh * 0.03;
+      const reachable = (u, v) => {
+        const [tx, ty] = projectQuad(q, gi.W, gi.H, u, v), dx = fw / 2 - tx, dy = fh / 2 - ty;
+        for (let i = 0; i < 8; i += 2) { const x = q[i] + dx, y = q[i + 1] + dy; if (x < mx || y < my || x > fw - mx || y > fh - my) return false; }
+        return true;
+      };
       const vw = (0.8 * fw) / zf / S.cell, vh = (0.8 * fh) / zf / S.cell; // the zoomed (or closer) view, in squares
       let best = null;
       for (let i = 0; i < m.per; i++) {
         if (got[i]) continue;
         const B = L.blocks[i], cu = B.x0 + L.bw / 2, cv = B.y0 + L.bh / 2;
         const key = `${Math.round(cu / (vw / 2))},${Math.round(cv / (vh / 2))}`;
-        if ((S.tried.get(key) || 0) >= 2) continue;
+        if ((S.tried.get(key) || 0) >= 2 || !reachable(cu, cv)) continue;
         let n = 0;
         for (let j = 0; j < m.per; j++) {
           if (got[j]) continue;
@@ -11155,7 +11164,11 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
         }
         if (!best || n > best.n) best = { n, u: cu, v: cv, key };
       }
-      if (!best) return stop(S.parts ? null : 'Couldn’t read this code part by part. Hold the phone closer, or tap Photo.');
+      if (!best) {
+        const left = got.some((v) => !v);
+        A.zoomBan = now + 20000;
+        return stop(left ? (S.parts ? 'The parts left are at the edges, where tilting loses the code’s corners. Step back a little, or tap Photo.' : 'The code fills the view, so there’s no room to tilt to its parts. Step back until it covers about half the screen, or tap Photo.') : null);
+      }
       S.target = { u: best.u, v: best.v };
       S.key = best.key;
       S.at = now;
