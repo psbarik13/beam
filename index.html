@@ -10554,11 +10554,13 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     return (s / 3600).toFixed(1) + ' h';
   }
   const PREF_KEY = 'beam.prefs.v1';
-  // Colour-grid send defaults, measured on a real phone: density 448 (5 px squares on that screen), 4 colours,
-  // error correction L, 30 frames a second, one code: close to 400 KB/s. GRID_V moves a device that saved older
-  // defaults onto these once; after that its own choices stay.
-  const GRID_DEFAULTS = { mode: 'grid', gDensity: 448, gColours: 4, gEcc: 'L', gfps: 30, gSlots: 1 };
-  const GRID_V = 2;
+  // Colour-grid send defaults, for a steady 200-300 KB/s with a 60 fps receiving camera: density 352 gives about
+  // 330-375 squares across on any screen (4.6-5.2 camera pixels per square for a 1080p camera that frames the code),
+  // about 12 KB a frame with 4 colours and error correction M; 30 frames a second. (A real phone read 3 of 4 frames
+  // at density 448 with L: close to 400 KB/s, with less margin.) GRID_V moves a device that saved older defaults onto
+  // these once; after that its own choices stay.
+  const GRID_DEFAULTS = { mode: 'grid', gDensity: 352, gColours: 4, gEcc: 'M', gfps: 30, gSlots: 1 };
+  const GRID_V = 3;
   const storedPrefs = (() => {
     try { return JSON.parse(localStorage.getItem(PREF_KEY)) || {}; } catch { return {}; }
   })();
