@@ -10554,15 +10554,24 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     return (s / 3600).toFixed(1) + ' h';
   }
   const PREF_KEY = 'beam.prefs.v1';
-  const prefs = Object.assign({
-    mode: 'grid', gDensity: 288, gColours: 4, gEcc: 'M', gfps: 15, gSlots: 1,
-    fps: 10, density: 6, ecl: 'L', tiles: 1, decoder: 'auto', facing: 'environment', camRes: 'hd', camFps: 'max', autoZoom: true,
-  }, (() => {
+  // Colour-grid send defaults, measured on a real phone: density 448 (5 px squares on that screen), 4 colours,
+  // error correction L, 30 frames a second, one code: close to 400 KB/s. GRID_V moves a device that saved older
+  // defaults onto these once; after that its own choices stay.
+  const GRID_DEFAULTS = { mode: 'grid', gDensity: 448, gColours: 4, gEcc: 'L', gfps: 30, gSlots: 1 };
+  const GRID_V = 2;
+  const storedPrefs = (() => {
     try { return JSON.parse(localStorage.getItem(PREF_KEY)) || {}; } catch { return {}; }
-  })());
+  })();
+  const prefs = Object.assign({
+    ...GRID_DEFAULTS,
+    fps: 10, density: 6, ecl: 'L', tiles: 1, decoder: 'auto', facing: 'environment', camRes: 'hd', camFps: 'max', autoZoom: true,
+  }, storedPrefs);
+  const gridMoved = !(storedPrefs.gridV >= GRID_V);
+  if (gridMoved) Object.assign(prefs, GRID_DEFAULTS, { gridV: GRID_V });
   // during a speed test the sweep changes settings; those must not become the saved ones
   let testSaved = null;
   function savePrefs() { try { localStorage.setItem(PREF_KEY, JSON.stringify(testSaved ? { ...prefs, ...testSaved } : prefs)); } catch {} }
+  if (gridMoved) savePrefs();
 
   let toastTimer;
   function toast(msg) {
@@ -10667,7 +10676,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   const gBits = () => ({ 2: 1, 4: 2, 8: 3 }[prefs.gColours] || 2);
   const speedKey = () => (isGrid() ? 'gfps' : 'fps');
   const curFps = () => prefs[speedKey()];
-  if (!G.PRESETS.includes(prefs.gDensity)) prefs.gDensity = 288;
+  if (!G.PRESETS.includes(prefs.gDensity)) prefs.gDensity = GRID_DEFAULTS.gDensity;
   // codes side by side on the sender's screen (each with the squares one code would have at this density)
   const gSlots = () => (G.SLOTS.includes(prefs.gSlots) ? prefs.gSlots : 1);
   /** The grid (or grids) that fit a drawing area given in device pixels, or null if too small. W x H: one code;
@@ -11496,7 +11505,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   }
   $('speed').addEventListener('input', (e) => setSetting(speedKey(), Number(e.target.value)));
   $('density').addEventListener('input', (e) => setSetting('density', Number(e.target.value)));
-  $('gdensity').addEventListener('input', (e) => { setSetting('gDensity', G.PRESETS[Number(e.target.value)] || 288); layoutKey = ''; });
+  $('gdensity').addEventListener('input', (e) => { setSetting('gDensity', G.PRESETS[Number(e.target.value)] || GRID_DEFAULTS.gDensity); layoutKey = ''; });
   document.querySelectorAll('[data-step]').forEach((b) => b.addEventListener('click', () => {
     const d = Number(b.dataset.d);
     if (b.dataset.step === 'gdensity') {
@@ -14170,8 +14179,8 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   setPassword('');
   prefs.fps = Math.min(60, Math.max(1, prefs.fps | 0));
   prefs.gfps = Math.min(60, Math.max(1, prefs.gfps | 0));
-  if (![2, 4, 8].includes(prefs.gColours)) prefs.gColours = 4;
-  if (!(prefs.gEcc in GECC)) prefs.gEcc = 'M';
+  if (![2, 4, 8].includes(prefs.gColours)) prefs.gColours = GRID_DEFAULTS.gColours;
+  if (!(prefs.gEcc in GECC)) prefs.gEcc = GRID_DEFAULTS.gEcc;
   $('speed').value = curFps();
   $('density').value = clampDensity();
 })();
