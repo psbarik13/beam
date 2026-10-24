@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f2740">
+<!-- Beam never talks to a network: everything happens in this page. This makes the browser enforce it. -->
+<meta http-equiv="Content-Security-Policy" content="connect-src 'none'">
 <title>Beam</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f2740'/%3E%3Cpath d='M16 16h12v12H16zM36 16h12v12H36zM16 36h12v12H16z' fill='%23e8d5a2'/%3E%3Cpath d='M38 38h4v4h-4zM44 44h4v4h-4zM38 46h3v2h-3z' fill='%23e8d5a2'/%3E%3C/svg%3E">
 <style>
@@ -93,6 +95,19 @@ a.btn { text-decoration: none; }
 .reduce-info { color: var(--muted); font-size: 13.5px; margin: 10px 0 0; min-height: 1em; }
 .reduce-info:empty { display: none; }
 .warnnote { color: var(--warn); font-size: 14px; margin: 12px 0 0; }
+.srcseg { margin-bottom: 12px; }
+.textbox { border: 2px dashed var(--manila-dark); border-radius: 18px; background: var(--surface); padding: 12px; display: grid; gap: 8px; }
+.textbox:focus-within { border-color: var(--accent); }
+.textbox textarea { width: 100%; min-height: 168px; max-height: 50vh; resize: vertical; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 15px; line-height: 1.5; font-family: inherit; }
+.txtfoot { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.txtfoot small { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.txtfoot small.over { color: var(--warn); }
+.txtclear { border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 9px; height: 32px; padding: 0 12px; font-weight: 600; font-size: 13px; }
+.keepnote { margin-top: 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--accent); padding: 14px 16px; display: grid; gap: 10px; }
+.keepnote p { margin: 0; color: var(--ink); font-size: 14px; }
+.ctl .testkeep { grid-column: 2 / -1; justify-self: start; margin-top: 2px; }
+.res-sub { display: block; margin-top: 4px; }
+
 .dock {
   position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
   padding: 14px 16px calc(14px + var(--safe-b)); background: var(--paper); border-top: 1px solid var(--line);
@@ -365,12 +380,19 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     </div>
     <p class="lede">Move a file between two devices through the screen and the camera. No Wi-Fi, cable or account. Open this page on both.</p>
 
+    <div class="seg-light seg2l srcseg" id="srcSeg" role="group" aria-label="What to send">
+      <button type="button" data-src="file" aria-pressed="true">File</button><button type="button" data-src="text" aria-pressed="false">Text</button>
+    </div>
     <label class="pick" id="pick">
       <input type="file" id="file" aria-label="Choose a file to send">
       <div class="big"><svg class="i"><use href="#i-plus"/></svg></div>
       <b>Choose a file to send</b>
       <span>or drop it here</span>
     </label>
+    <div class="textbox" id="textBox" hidden>
+      <textarea id="txtIn" placeholder="Type or paste text to send" aria-label="Text to send" spellcheck="false"></textarea>
+      <div class="txtfoot"><small id="txtCount">Up to 2,000,000 characters</small><button type="button" class="txtclear" id="txtClear">Clear</button></div>
+    </div>
     <div class="chosen" id="chosen" hidden>
       <div class="ic"><svg class="i"><use href="#i-file"/></svg></div>
       <div><b id="cName"></b><small id="cInfo"></small></div>
@@ -397,6 +419,10 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
       <p class="pwnote" id="pwNote">With a password, the file is encrypted (AES-256) before it leaves this device. The receiver must type it to open the file; without it nothing can be read, not even the name.</p>
     </div>
     <p class="warnnote" id="cWarn" hidden></p>
+    <div class="keepnote" id="keepNote" hidden>
+      <p id="keepText"></p>
+      <div class="seg-light seg2l"><button type="button" id="keepYes">Use them</button><button type="button" id="keepNo">Keep mine</button></div>
+    </div>
     <p class="warnnote" id="noCam" hidden>No camera found on this device, so it can send but not receive.</p>
     <div class="testentry">
       <div><b>Speed test</b><span>Find the fastest settings for these two devices. Start it here on the sender; on the other device just tap Receive and it measures by itself.</span></div>
@@ -440,6 +466,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
         <button type="button" data-test="manual">Manual</button><button type="button" data-test="auto">Auto sweep</button>
       </div>
       <span class="val" id="testVal"></span>
+      <button class="btn small ghost testkeep" id="testKeep" type="button">Use these settings for sending</button>
     </div>
     <div class="stats">
       <div class="stat"><small id="stCodeL">Frame</small><b id="stCode">#0</b></div>
@@ -601,6 +628,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
   <div class="viewer" id="viewer"></div>
   <nav class="res-actions" id="resActions">
     <a class="btn primary" id="saveBtn" download><svg class="i"><use href="#i-save"/></svg>Save</a>
+    <button class="btn" id="copyBtn" type="button" hidden><svg class="i"><use href="#i-file"/></svg>Copy text</button>
     <button class="btn" id="shareBtn" type="button" hidden><svg class="i"><use href="#i-share"/></svg>Share</button>
     <a class="btn" id="openBtn" target="_blank" rel="noopener"><svg class="i"><use href="#i-open"/></svg>Open</a>
     <button class="btn" id="againBtn" type="button"><svg class="i"><use href="#i-cam"/></svg>Receive another</button>
@@ -616,7 +644,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     <div class="mbody" id="xBody">
       <div class="mrow"><span class="ml">Format</span>
         <div class="seg-light" id="xFormat" role="group" aria-label="Format">
-          <button type="button" data-f="pdf">PDF to print</button><button type="button" data-f="png">Images</button><button type="button" data-f="html">Slideshow</button><button type="button" data-f="gif">GIF</button>
+          <button type="button" data-f="pdf">PDF to print</button><button type="button" data-f="png">Images</button><button type="button" data-f="html">Slideshow</button><button type="button" data-f="gif">GIF / APNG</button>
         </div>
         <p class="mnote" id="xFormatNote"></p>
       </div>
@@ -631,8 +659,14 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
         </div>
         <p class="mnote" id="xTilesNote"></p>
       </div>
-      <div class="mrow" data-x="gif"><span class="ml">GIF size</span>
-        <div class="seg-light seg3l" id="xGsize" role="group" aria-label="GIF size">
+      <div class="mrow" data-x="gif"><span class="ml">File type</span>
+        <div class="seg-light seg2l" id="xAnim" role="group" aria-label="Animation file type">
+          <button type="button" data-an="gif">GIF</button><button type="button" data-an="apng">Animated PNG</button>
+        </div>
+        <p class="mnote" id="xAnimNote"></p>
+      </div>
+      <div class="mrow" data-x="gif"><span class="ml">Size</span>
+        <div class="seg-light seg3l" id="xGsize" role="group" aria-label="Animation size">
           <button type="button" data-gs="960">960 px</button><button type="button" data-gs="1280">1280 px</button><button type="button" data-gs="1920">1920 px</button>
         </div>
         <p class="mnote" id="xGsizeNote"></p>
@@ -716,7 +750,7 @@ input[type=range] { width: 100%; accent-color: var(--manila); height: 28px; }
     <div class="mhead"><b id="pwTitle">Password needed</b><span></span></div>
     <form class="mbody" id="pwForm" autocomplete="off">
       <p class="mstat">This file is protected. Type the password the sender used.</p>
-      <div class="pwrow" style="margin-top:12px"><input type="password" id="pwIn" autocapitalize="off" spellcheck="false" aria-label="Password" placeholder="Password"><button type="button" id="pwInShow" aria-pressed="false">Show</button></div>
+      <div class="pwrow" style="margin-top:12px"><input type="password" id="pwIn" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Password" placeholder="Password"><button type="button" id="pwInShow" aria-pressed="false">Show</button></div>
       <p class="pwerr" id="pwErr" aria-live="assertive"></p>
       <button type="submit" hidden></button>
     </form>
@@ -9940,8 +9974,8 @@ pako/dist/pako.esm.mjs:
    - Password: the packed file (name, type, content) is encrypted with AES-256-GCM; the key comes from the
      password through PBKDF2-SHA-256 with a random salt. Envelope: "BEAX" | version | iterations | salt | iv | ciphertext.
    - Export: a fixed set of grid frames (all chunks plus spare repair pieces), written as a PDF to print,
-     PNG images in a ZIP, a self-running HTML slideshow for any screen, or an animated GIF (1 to 9 codes a frame).
-   - Import: reads those back (Beam PDFs, ZIPs, slideshows, GIFs) or any photo or screenshot of a frame.
+     PNG images in a ZIP, a self-running HTML slideshow for any screen, or an animated GIF or PNG (1 to 9 codes a frame).
+   - Import: reads those back (Beam PDFs, ZIPs, slideshows, GIFs, animated PNGs) or any photo or screenshot of a frame.
    Works in the page (self.BeamExport) and in Node (require). */
 (function (root) {
   'use strict';
@@ -10435,6 +10469,118 @@ pako/dist/pako.esm.mjs:
     };
   }
   /** Every frame of an animated GIF as RGBA (for tests and small files). */
+  // ------------------------------------------------------------------ animated PNG (APNG)
+  // The same pictures as the GIF, 4 to 5 times smaller: deflate finds each repeated row of squares (the row above,
+  // a few hundred bytes back), which GIF's LZW can't. Exact frame times. Plays in current browsers (Chrome, Edge,
+  // Firefox, Safari); an app that doesn't know APNG shows the first frame only. Frames: 4-bit indexed colour.
+  function apngWriter(w, h, palette, fps) {
+    if (palette.length > 16) throw new Error('APNG frames hold up to 16 colours');
+    const rate = Math.max(1, Math.min(60, Math.round(fps)));
+    const frames = [];
+    return {
+      fps: rate,
+      async add(data) { frames.push(await deflate(pack4({ w, h, data }, 1))); },
+      done() {
+        const u32 = (v) => [(v >>> 24) & 255, (v >>> 16) & 255, (v >>> 8) & 255, v & 255];
+        const ihdr = new Uint8Array([...u32(w), ...u32(h), 4, 3, 0, 0, 0]);
+        const plte = new Uint8Array(palette.length * 3);
+        palette.forEach(([r, g, b], i) => { plte[i * 3] = r; plte[i * 3 + 1] = g; plte[i * 3 + 2] = b; });
+        const parts = [new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('PLTE', plte), chunk('acTL', new Uint8Array([...u32(frames.length), ...u32(0)]))];
+        let seq = 0;
+        frames.forEach((z, i) => {
+          // fcTL: sequence, size, offset 0,0, delay 1/rate s, dispose none, blend source (each frame replaces the last)
+          parts.push(chunk('fcTL', new Uint8Array([...u32(seq++), ...u32(w), ...u32(h), ...u32(0), ...u32(0), 0, 1, (rate >> 8) & 255, rate & 255, 0, 0])));
+          if (i === 0) parts.push(chunk('IDAT', z));
+          else { const d = new Uint8Array(4 + z.length); d.set(u32(seq++)); d.set(z, 4); parts.push(chunk('fdAT', d)); }
+        });
+        parts.push(chunk('IEND', new Uint8Array(0)));
+        return new Blob(parts, { type: 'image/png' });
+      },
+    };
+  }
+  const isPng = (b) => b && b.length > 8 && b[0] === 137 && b[1] === 80 && b[2] === 78 && b[3] === 71;
+  /** An animated PNG's frames, one at a time, as RGBA over white (drawn over each other as a viewer shows them):
+      { w, h, count, next() -> Promise<{ w, h, rgba }> or null }. Null if not an animated PNG this reads
+      (indexed colour at 1 to 8 bits, or 8-bit grey, RGB or RGBA; no interlacing). */
+  function apngReader(bytes) {
+    if (!isPng(bytes)) return null;
+    const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let p = 8, w = 0, h = 0, bpc = 0, ct = 0, il = 0, pal = null, trns = null, actl = false, cur = null;
+    const frames = [];
+    while (p + 12 <= bytes.length) {
+      const len = dv.getUint32(p), type = String.fromCharCode(bytes[p + 4], bytes[p + 5], bytes[p + 6], bytes[p + 7]);
+      if (p + 12 + len > bytes.length) break;
+      const d = bytes.subarray(p + 8, p + 8 + len), q = p + 8;
+      if (type === 'IHDR') { w = dv.getUint32(q); h = dv.getUint32(q + 4); bpc = d[8]; ct = d[9]; il = d[12]; }
+      else if (type === 'PLTE') pal = d;
+      else if (type === 'tRNS') trns = d;
+      else if (type === 'acTL') actl = true;
+      else if (type === 'fcTL' && len >= 26) { cur = { w: dv.getUint32(q + 4), h: dv.getUint32(q + 8), x: dv.getUint32(q + 12), y: dv.getUint32(q + 16), dispose: d[24], blend: d[25], data: [] }; frames.push(cur); }
+      else if (type === 'IDAT' && cur) cur.data.push(d); // IDAT before the first fcTL is a still image outside the animation
+      else if (type === 'fdAT' && cur) cur.data.push(d.subarray(4));
+      else if (type === 'IEND') break;
+      p += 12 + len;
+    }
+    const chans = { 0: 1, 2: 3, 3: 1, 6: 4 }[ct];
+    if (!actl || il || !w || !h || !frames.length || !chans || (ct === 3 ? ![1, 2, 4, 8].includes(bpc) || !pal : bpc !== 8)) return null;
+    const bitsPx = chans * bpc, bpp = Math.max(1, bitsPx >> 3);
+    const canvas = new Uint8ClampedArray(w * h * 4); // RGBA, transparent until drawn
+    let i = 0, undo = null;
+    function rows(raw, fw, fh) { // un-filter in place: returns the pixel bytes without filter bytes
+      const stride = Math.ceil((fw * bitsPx) / 8), out = new Uint8Array(stride * fh);
+      for (let y = 0; y < fh; y++) {
+        const f = raw[y * (stride + 1)], src = y * (stride + 1) + 1, o = y * stride, up = o - stride;
+        for (let x = 0; x < stride; x++) {
+          const a = x >= bpp ? out[o + x - bpp] : 0, b = y ? out[up + x] : 0, c = y && x >= bpp ? out[up + x - bpp] : 0;
+          let v = raw[src + x];
+          if (f === 1) v += a; else if (f === 2) v += b; else if (f === 3) v += (a + b) >> 1;
+          else if (f === 4) { const pp = a + b - c, pa = Math.abs(pp - a), pb = Math.abs(pp - b), pc = Math.abs(pp - c); v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c; }
+          out[o + x] = v;
+        }
+      }
+      return { out, stride };
+    }
+    function pixel(px, stride, x, y) { // -> [r, g, b, a]
+      if (ct === 3) {
+        const bit = x * bpc, v = (px[y * stride + (bit >> 3)] >> (8 - bpc - (bit & 7))) & ((1 << bpc) - 1);
+        return [pal[v * 3], pal[v * 3 + 1], pal[v * 3 + 2], trns && v < trns.length ? trns[v] : 255];
+      }
+      const o = y * stride + x * chans;
+      if (ct === 0) return [px[o], px[o], px[o], 255];
+      return [px[o], px[o + 1], px[o + 2], ct === 6 ? px[o + 3] : 255];
+    }
+    return {
+      w, h, count: frames.length,
+      async next() {
+        if (i >= frames.length) return null;
+        const f = frames[i++];
+        if (undo) { // the previous frame's dispose: clear its area, or put back what was under it
+          for (let y = 0; y < undo.h; y++) for (let x = 0; x < undo.w; x++) {
+            const o = ((undo.y + y) * w + undo.x + x) * 4;
+            for (let k = 0; k < 4; k++) canvas[o + k] = undo.keep ? undo.keep[(y * undo.w + x) * 4 + k] : 0;
+          }
+          undo = null;
+        }
+        const fw = Math.min(f.w, w - f.x), fh = Math.min(f.h, h - f.y);
+        if (f.dispose === 1 || f.dispose === 2) {
+          undo = { x: f.x, y: f.y, w: fw, h: fh, keep: null };
+          if (f.dispose === 2) { undo.keep = new Uint8ClampedArray(fw * fh * 4); for (let y = 0; y < fh; y++) undo.keep.set(canvas.subarray(((f.y + y) * w + f.x) * 4, ((f.y + y) * w + f.x + fw) * 4), y * fw * 4); }
+        }
+        const { out, stride } = rows(await inflate(concat(f.data)), f.w, f.h);
+        for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) {
+          const [r, g, b, a] = pixel(out, stride, x, y), o = ((f.y + y) * w + f.x + x) * 4;
+          if (f.blend === 1 && a < 255) { // over
+            const ia = canvas[o + 3] * (255 - a) / 255, na = a + ia;
+            if (na > 0) { canvas[o] = (r * a + canvas[o] * ia) / na; canvas[o + 1] = (g * a + canvas[o + 1] * ia) / na; canvas[o + 2] = (b * a + canvas[o + 2] * ia) / na; }
+            canvas[o + 3] = na;
+          } else { canvas[o] = r; canvas[o + 1] = g; canvas[o + 2] = b; canvas[o + 3] = a; }
+        }
+        const rgba = new Uint8ClampedArray(w * h * 4); // over white, as the reader wants it
+        for (let k = 0; k < rgba.length; k += 4) { const a = canvas[k + 3]; rgba[k] = 255 - ((255 - canvas[k]) * a) / 255; rgba[k + 1] = 255 - ((255 - canvas[k + 1]) * a) / 255; rgba[k + 2] = 255 - ((255 - canvas[k + 2]) * a) / 255; rgba[k + 3] = 255; }
+        return { w, h, rgba };
+      },
+    };
+  }
   function gifFrames(bytes) {
     const r = gifReader(bytes), out = [];
     if (!r) return out;
@@ -10525,6 +10671,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   const api = {
     deflate, inflate, encrypt, decrypt, isEncrypted, exportPlan, countFrames, exportFrames, compose, quietFor, png, readPng, zip, unzip, pdf, pdfImages, pageGrid, pageLayout, PAGES, TILES,
     slideshow, slideshowImages, gifWriter, gifFrame, gifReader, gifFrames, gifDelay, isGif,
+    apngWriter, apngReader, isPng,
   };
   root.BeamExport = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
@@ -10705,7 +10852,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     $('xSum').hidden = true;
     $('chosen').hidden = false;
     $('protect').hidden = !canEncrypt;
-    $('cName').textContent = file.name;
+    $('cName').textContent = file.textLabel || file.name;
     $('cInfo').textContent = 'Preparing…';
     $('cWarn').hidden = true;
     $('compress').hidden = true;
@@ -11047,6 +11194,83 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   }
   $('reduceSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-level]'); if (b) applyReduce(b.dataset.level); });
 
+  // ---- send text: typed or pasted text goes out as a UTF-8 .txt file, compressed like any file (PPMd suits
+  // text: about a quarter of its size for English) and optionally protected with the password.
+  const TEXT_MAX = 2000000; // characters (UTF-16 units). Beam itself has no such limit; this keeps typing smooth.
+  let srcMode = 'file', textTimer = 0;
+  function clearChosen() {
+    ++prepareSeq;
+    cancelReduce();
+    prepared = null;
+    original = null;
+    $('sendBtn').disabled = true;
+    $('exportBtn').disabled = true;
+    for (const id of ['chosen', 'reduce', 'compress', 'cWarn', 'xSum', 'protect']) $(id).hidden = true;
+  }
+  function setSrc(mode) {
+    if (mode === srcMode) return;
+    srcMode = mode;
+    for (const b of $('srcSeg').querySelectorAll('button')) b.setAttribute('aria-pressed', String(b.dataset.src === mode));
+    $('pick').hidden = mode !== 'file';
+    $('textBox').hidden = mode !== 'text';
+    $('file').value = '';
+    clearChosen();
+    if (mode === 'text') { $('txtIn').focus(); textChanged(true); }
+  }
+  $('srcSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-src]'); if (b) setSrc(b.dataset.src); });
+  const two = (n) => String(n).padStart(2, '0');
+  const textName = () => { const d = new Date(); return `text-${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}-${two(d.getHours())}${two(d.getMinutes())}.txt`; };
+  function textChanged(now) {
+    clearTimeout(textTimer);
+    const t = $('txtIn').value, n = t.length, over = n > TEXT_MAX, c = $('txtCount');
+    c.classList.toggle('over', over);
+    const chars = `${n.toLocaleString()} ${n === 1 ? 'character' : 'characters'}`;
+    if (!n) c.textContent = 'Up to 2,000,000 characters';
+    else if (over) c.textContent = `${chars}: ${(n - TEXT_MAX).toLocaleString()} over the 2,000,000 limit`;
+    else c.textContent = chars;
+    if (!n || over) { clearChosen(); return; }
+    // the text changed: what was prepared no longer matches it
+    ++prepareSeq;
+    prepared = null;
+    $('sendBtn').disabled = true;
+    $('exportBtn').disabled = true;
+    if (!$('chosen').hidden) $('cInfo').textContent = 'Preparing…';
+    textTimer = setTimeout(() => {
+      const words = (t.match(/\S+/g) || []).length;
+      c.textContent = `${chars} · ${words.toLocaleString()} ${words === 1 ? 'word' : 'words'}`;
+      const file = new File([t], textName(), { type: 'text/plain' });
+      file.textLabel = `Text, ${words.toLocaleString()} ${words === 1 ? 'word' : 'words'}`;
+      original = null;
+      prepare(file);
+    }, now ? 0 : 450);
+  }
+  $('txtIn').addEventListener('input', () => textChanged(false));
+  $('txtClear').addEventListener('click', () => { $('txtIn').value = ''; textChanged(true); $('txtIn').focus(); });
+
+  // ---- after a speed test: offer its settings for sending (the test never changes them by itself)
+  const settingsLine = (s) => `density ${s.gDensity}, ${s.gColours} colours, error correction ${s.gEcc}, ${s.gfps} frames a second`;
+  const GRID_KEYS = ['gDensity', 'gColours', 'gEcc', 'gfps'];
+  let lastTest = null;
+  function keepTestSettings() {
+    if (!tx || !tx.test || !testSaved) return;
+    testSaved = { mode: 'grid', gDensity: prefs.gDensity, gColours: prefs.gColours, gEcc: prefs.gEcc, gfps: prefs.gfps };
+    savePrefs();
+    toast('Saved. Sending will use ' + settingsLine(prefs) + '.');
+  }
+  $('testKeep').addEventListener('click', keepTestSettings);
+  function offerTestSettings(test, saved) {
+    if (!test || test.auto || !saved || GRID_KEYS.every((k) => prefs[k] === saved[k])) return;
+    lastTest = { gDensity: prefs.gDensity, gColours: prefs.gColours, gEcc: prefs.gEcc, gfps: prefs.gfps };
+    $('keepText').textContent = `The speed test ended on ${settingsLine(lastTest)}. Use these for sending? Now sending uses ${settingsLine(saved)}.`;
+    $('keepNote').hidden = false;
+  }
+  $('keepYes').addEventListener('click', () => {
+    if (lastTest) { Object.assign(prefs, lastTest, { mode: 'grid' }); savePrefs(); toast('Sending will use ' + settingsLine(prefs) + '.'); if (prepared) describeChosen(); }
+    lastTest = null;
+    $('keepNote').hidden = true;
+  });
+  $('keepNo').addEventListener('click', () => { lastTest = null; $('keepNote').hidden = true; });
+
   $('file').addEventListener('change', (e) => { const f = e.target.files[0]; if (f) chooseFile(f); });
   const pick = $('pick');
   ['dragenter', 'dragover'].forEach((t) => pick.addEventListener(t, (e) => { e.preventDefault(); pick.classList.add('drag'); }));
@@ -11055,7 +11279,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   window.addEventListener('drop', (e) => {
     e.preventDefault();
     const f = e.dataTransfer && e.dataTransfer.files[0];
-    if (f && current === 'home') chooseFile(f);
+    if (f && current === 'home') { if (srcMode !== 'file') setSrc('file'); chooseFile(f); }
   });
   $('sendBtn').addEventListener('click', startSending);
   $('recvBtn').addEventListener('click', startReceiving);
@@ -11338,6 +11562,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       for (const b of $('testSeg').querySelectorAll('button')) b.setAttribute('aria-pressed', String((b.dataset.test === 'auto') === T.auto));
       const left = T.auto && T.stepStart ? Math.max(0, Math.ceil((T.stepMs - (performance.now() - T.stepStart)) / 1000)) : 0;
       $('sSize').textContent = T.auto ? `auto sweep · step ${T.i + 1} of ${T.steps.length} · round ${T.loop + 1} · next in ${left} s` : `manual · ${rateTxt}`;
+      $('testKeep').hidden = !!T.auto;
       $('testVal').textContent = T.auto
         ? 'Loops through densities, colours, speeds and error correction for ever. The receiver measures each step and shows the best sender settings.'
         : 'Sends test frames with your settings. Change them and watch the receiver: it keeps a table of every setting tried.';
@@ -11483,7 +11708,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     if (!tx) return;
     cancelAnimationFrame(tx.raf);
     tx.workers.forEach((w) => w.terminate());
-    if (tx.test && testSaved) { Object.assign(prefs, testSaved); testSaved = null; }
+    if (tx.test && testSaved) { const saved = testSaved; offerTestSettings(tx.test, saved); Object.assign(prefs, saved); testSaved = null; }
     tx = null;
     keepAwake(false);
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
@@ -11961,7 +12186,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       prog: { id: null, rank: 0, K: 0, total: 0, block: 0, received: 0 }, reads: [], seqs: new Map(), innov: [], decodeMs: [],
       camFrames: [], decodedAt: [], dropped: 0, gridLog: [], gridInfo: null, gridBlocks: 0, mode: null,
       pumpLog: [], ov: null, test: null, advice: null, pump: canPump ? new FramePump() : null,
-      startedAt: 0, lastRead: 0, camStart: performance.now(), notBeam: 0, finished: false, hadProgress: false,
+      startedAt: 0, lastRead: 0, camStart: performance.now(), openedAt: performance.now(), tl: null, notBeam: 0, finished: false, hadProgress: false,
     };
     try {
       rx.asm = makeAssembler();
@@ -12332,6 +12557,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   }
 
   let flashTimer;
+  const PAUSE_MS = 600;
   function onAssembler(e) {
     if (!rx) return;
     const m = e.data;
@@ -12350,6 +12576,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       if (res.newTransfer) {
         if (rx.hadProgress) toast('A different file started on the sender. Starting over.');
         rx.startedAt = now;
+        rx.tl = { last: now, pauses: 0, pauseN: 0 };
         rx.reads = []; rx.seqs.clear(); rx.innov = [];
         rx.allSeqs = new Set();
         if (rx.cmap) { rx.cmap.frames.clear(); rx.cmap.view = []; }
@@ -12361,7 +12588,14 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       rx.tiles = rx.mode === 'grid' ? rx.gridBlocks || 1 : res.tiles || 1;
       rx.reads.push(now);
       if (!rx.seqs.has(res.seq)) rx.seqs.set(res.seq, now);
-      if (res.innovative) { rx.innov.push([now, res.innovative]); rx.lastNew = now; }
+      if (res.innovative) {
+        rx.innov.push([now, res.innovative]);
+        rx.lastNew = now;
+        // a stretch over PAUSE_MS without a new block is a pause (lost aim, blur, focus): kept for the result screen
+        const tl = rx.tl || (rx.tl = { last: now, pauses: 0, pauseN: 0 });
+        if (now - tl.last > PAUSE_MS) { tl.pauses += now - tl.last; tl.pauseN++; }
+        tl.last = now;
+      }
       rx.lastRead = now;
       hit = true;
     }
@@ -13060,24 +13294,32 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   function finishReceiving(m) {
     if (!rx) return;
     const secs = ((rx.finishing || performance.now()) - Math.min(rx.startedAt, rx.photoStart || Infinity)) / 1000;
+    const tl = timeline(secs);
     rx.finished = true;
     $('rBar').style.width = '100%';
     $('rPct').textContent = '100%';
     if (navigator.vibrate) navigator.vibrate(60);
     stopReceiving();
-    deliver(m, { secs, K: m.K, received: m.received });
+    deliver(m, { secs, K: m.K, received: m.received, tl });
+  }
+  // where the time went, for the result screen: before the first block, then reading with its pauses
+  function timeline(secs) {
+    if (!rx || !rx.startedAt || rx.photoStart) return null;
+    const tl = rx.tl || { pauses: 0, pauseN: 0 };
+    return { before: Math.max(0, (rx.startedAt - rx.openedAt) / 1000), pauses: Math.min(secs, tl.pauses / 1000), pauseN: tl.pauseN, secs };
   }
   // The whole file arrived but it is encrypted: ask for the password, then open it.
   function finishLocked(m) {
     if (!rx) return;
     const secs = ((rx.finishing || performance.now()) - Math.min(rx.startedAt, rx.photoStart || Infinity)) / 1000;
+    const tl = timeline(secs);
     rx.finished = true;
     $('rBar').style.width = '100%';
     $('rPct').textContent = '100%';
     if (navigator.vibrate) navigator.vibrate(60);
     stopReceiving();
     $('rMsg').textContent = 'File received. It is protected with a password.';
-    unlock(new Uint8Array(m.buf), { secs, K: m.K, received: m.received });
+    unlock(new Uint8Array(m.buf), { secs, K: m.K, received: m.received, tl });
   }
   /** m: { name, mime, verified, crc, buf } -> the result screen. */
   function deliver(m, ctx) {
@@ -13166,7 +13408,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       : `received in ${fmtTime(secs)}${rate ? ` (${rate})` : ''}`;
     $('resInfo').innerHTML = `${fmtBytes(file.size)}, ${how}. ` + (ctx.locked ? '<span class="lock">Unlocked with the password.</span> ' : '') +
       (ctx.transform === 2 ? 'Rebuilt from its parts: the same contents as the sender’s document. ' : '') +
-      (verified ? '<span class="ver">Checksum verified.</span>' : '<span class="bad">Checksum mismatch: the file may be damaged.</span>');
+      (verified ? '<span class="ver">Checksum verified.</span>' : '<span class="bad">Checksum mismatch: the file may be damaged.</span>') + timelineText(ctx, secs);
     const save = $('saveBtn');
     save.href = resultUrl;
     save.download = file.name;
@@ -13178,6 +13420,11 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const v = $('viewer');
     v.className = 'viewer';
     const type = file.type;
+    const isText = type.startsWith('text/') || /json|xml/.test(type) || TEXT_EXT.test(file.name);
+    $('copyBtn').hidden = !isText;
+    $('copyBtn').onclick = async () => {
+      try { const t = await file.text(); await copyText(t); toast(`Copied ${t.length.toLocaleString()} characters.`); } catch (e) { toast('Could not copy. Save the file instead.'); }
+    };
     if (type.startsWith('image/')) {
       const img = new Image();
       img.className = 'zoomable';
@@ -13193,11 +13440,11 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       v.innerHTML = `<audio controls src="${resultUrl}"></audio>`;
     } else if (type === 'application/pdf' && matchMedia('(pointer: fine)').matches) {
       v.innerHTML = `<iframe src="${resultUrl}" title="${file.name.replace(/"/g, '')}"></iframe>`;
-    } else if (type.startsWith('text/') || /json|xml/.test(type) || TEXT_EXT.test(file.name)) {
+    } else if (isText) {
       v.classList.add('scroll');
-      file.slice(0, 2 * 1024 * 1024).text().then((text) => {
+      file.slice(0, TEXT_VIEW).text().then((text) => {
         const pre = document.createElement('pre');
-        pre.textContent = text + (file.size > 2 * 1024 * 1024 ? '\n\n… Showing the first 2 MB. Save the file to see all of it.' : '');
+        pre.textContent = text + (file.size > TEXT_VIEW ? `\n\n… Showing the first ${fmtBytes(TEXT_VIEW)}. Copy text or Save gets all of it.` : '');
         v.appendChild(pre);
         zoomCleanup = textZoom(v, pre);
       });
@@ -13206,6 +13453,26 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
         ? 'Tap Open to view the PDF, or Save to keep it.'
         : 'No preview for this type. Save it to open it with another app.');
     }
+  }
+  const TEXT_VIEW = 8 * 1024 * 1024;
+  async function copyText(t) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t);
+    const ta = document.createElement('textarea'); // older browsers and plain-http pages
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    if (!ok) throw new Error('copy refused');
+  }
+  function timelineText(ctx, secs) {
+    const t = ctx.tl;
+    if (!t || ctx.imported || !(secs > 0) || !ctx.K) return '';
+    const sent = ctx.K * C.BLOCK, active = Math.max(0.05, secs - t.pauses);
+    const f1 = (x) => (x < 10 ? x.toFixed(1) : Math.round(x)) + ' s';
+    let txt = `Sent ${fmtBytes(sent)}: ${fmtBytes(sent / secs)}/s overall`;
+    if (t.pauseN) txt += `, ${fmtBytes(sent / active)}/s while reading (${f1(t.pauses)} lost in ${t.pauseN} ${t.pauseN === 1 ? 'pause' : 'pauses'} of the ${f1(secs)})`;
+    txt += `. ${f1(t.before)} from opening the camera to the first block, not counted.`;
+    return `<span class="res-sub">${txt}</span>`;
   }
   function noPreview(msg) {
     return `<div class="nopreview"><div><svg class="i"><use href="#i-file"/></svg><p>${msg}</p></div></div>`;
@@ -13380,6 +13647,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       const m = await openPacked(packed);
       pwJob = null;
       $('pwDlg').hidden = true;
+      $('pwIn').value = ''; // don't leave the password in the page
       deliver(m, { ...job.ctx, locked: true });
     } catch (e) {
       job.busy = false;
@@ -13388,7 +13656,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   }
   $('pwOk').addEventListener('click', tryPassword);
   $('pwForm').addEventListener('submit', (e) => { e.preventDefault(); tryPassword(); });
-  $('pwCancel').addEventListener('click', () => { pwJob = null; $('pwDlg').hidden = true; goHome(); });
+  $('pwCancel').addEventListener('click', () => { pwJob = null; $('pwIn').value = ''; $('pwDlg').hidden = true; goHome(); });
 
   // ------------------------------------------------------------ export
   // A fixed set of grid frames, every chunk plus spare repair pieces, as a PDF to print, PNG images (in a ZIP)
@@ -13403,7 +13671,9 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   // format, paper and shape are shared; density, colours, error correction, spares and speed are kept per format
   const X_KEYS = ['dens', 'colours', 'ecc', 'extra', 'fps'];
   const xf = Object.assign({}, prefs.xf || {});
-  const xs = Object.assign({ format: 'pdf', page: LETTER ? 'ltrl' : 'a4l', shape: 'wide', tiles: 1, fps: 10, gsize: 1280, slots: 1 }, prefs.x || {});
+  const xs = Object.assign({ format: 'pdf', page: LETTER ? 'ltrl' : 'a4l', shape: 'wide', tiles: 1, fps: 10, gsize: 1280, slots: 1, anim: 'gif' }, prefs.x || {});
+  if (!['gif', 'apng'].includes(xs.anim)) xs.anim = 'gif';
+  const animName = () => (xs.anim === 'apng' ? 'animated PNG' : 'GIF');
   if (![1, 4, 9].includes(xs.tiles)) xs.tiles = 1;
   if (![960, 1280, 1920].includes(xs.gsize)) xs.gsize = 1280;
   if (!G.SLOTS.includes(xs.slots)) xs.slots = 1;
@@ -13454,6 +13724,10 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     pressed('xPage', 'p', xs.page);
     pressed('xShape', 's', xs.shape);
     pressed('xGsize', 'gs', xs.gsize);
+    pressed('xAnim', 'an', xs.anim);
+    $('xAnimNote').textContent = xs.anim === 'apng'
+      ? 'About 4 to 5 times smaller than a GIF of the same codes, with exact frame times. Plays in current browsers (Chrome, Edge, Firefox, Safari); photo and chat apps that don’t know animated PNG show only the first frame.'
+      : 'Plays almost everywhere, but large: GIF has to store every row of each square again.';
     pressed('xSlots', 'sl', xs.slots);
     pressed('xColours', 'c', xs.colours);
     pressed('xEcc', 'e', xs.ecc);
@@ -13461,12 +13735,14 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     for (const r of $('xBody').querySelectorAll('[data-x]')) r.hidden = !r.dataset.x.split(' ').includes(xs.format);
     $('xFps').textContent = `${xs.fps} frames a second`;
     const gd = X.gifDelay(xs.fps);
-    $('xFpsNote').textContent = xs.format === 'gif' ? (100 / gd === xs.fps ? 'GIF frame times are whole hundredths of a second.' : `GIF frame times are whole hundredths of a second: it plays at ${(100 / gd).toFixed(1)} a second.`) + ' Most phones keep up with 8 to 15.' : '';
+    $('xFpsNote').textContent = xs.format !== 'gif' ? '' : (xs.anim === 'apng' ? 'Plays at exactly this speed.' : 100 / gd === xs.fps ? 'GIF frame times are whole hundredths of a second.' : `GIF frame times are whole hundredths of a second: it plays at ${(100 / gd).toFixed(1)} a second.`) + ' Most phones keep up with 8 to 15.';
     $('xFormatNote').textContent = {
       pdf: 'One code per page. Print it, then scan the pages with Receive, or photograph them and use Import.',
       png: 'One image per code, in a ZIP. Show them on any screen, or send them to someone with Beam.',
       html: 'One page that plays the codes in a loop. Open it on any computer or TV, in full screen.',
-      gif: 'An animated GIF that loops: it plays in any browser, photo viewer or chat. Show it at its own size or bigger. Chat apps may turn GIFs into blurry videos: send it as a file. Import reads it too.',
+      gif: xs.anim === 'apng'
+        ? 'An animated PNG that loops, in a browser. Show it at its own size or bigger. Send it as a file: chat apps may change it. Import reads it too.'
+        : 'An animated GIF that loops: it plays in any browser, photo viewer or chat. Show it at its own size or bigger. Chat apps may turn GIFs into blurry videos: send it as a file. Import reads it too.',
     }[xs.format];
     const plan = xPlan();
     const box = $('xCountBox');
@@ -13474,7 +13750,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       $('xDens').textContent = String(xs.dens);
       $('xCount').textContent = '–'; $('xCountL').textContent = '';
       $('xCountNote').textContent = xs.format === 'gif' && xs.slots > 1
-        ? `${xs.slots} codes don’t fit in this GIF: each needs at least about 110 squares across. Choose fewer codes, a bigger GIF or a higher density.`
+        ? `${xs.slots} codes don’t fit in this ${animName()}: each needs at least about 110 squares across. Choose fewer codes, a bigger size or a higher density.`
         : 'These settings don’t fit. Choose a higher density.';
       box.classList.add('bad');
       $('xGo').disabled = true;
@@ -13484,7 +13760,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     $('xDens').textContent = `${xs.dens}: ${L.W} × ${L.H} squares` + (T > 1 ? ` per code` : '');
     if (xs.format === 'gif') {
       const sg = g.sg, one = xs.slots > 1 ? G.slotGrid(g.w, g.h, xs.dens, 1, X_BITS[xs.colours], GECC[xs.ecc]) : null;
-      $('xGsizeNote').textContent = `${g.w} × ${g.h} pixels a frame. A bigger GIF has bigger squares at the same density, and a bigger file.`;
+      $('xGsizeNote').textContent = `${g.w} × ${g.h} pixels a frame. A bigger size has bigger squares at the same density, and a bigger file.`;
       $('xSlotsNote').textContent = sg.k === 1
         ? 'One code fills the frame: the most data per frame.'
         : `${sg.k} codes side by side (${sg.cols} × ${sg.rows}), ${fmtBytes(sg.blocks * C.BLOCK)} a frame` + (one ? `: ${one.blocks > sg.blocks ? `${Math.round((1 - sg.blocks / one.blocks) * 100)}% less than one code (${fmtBytes(one.blocks * C.BLOCK)})` : 'about the same as one code'}. The squares stay the same size.` : '.');
@@ -13513,11 +13789,11 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       const c = g.sg.cell, [w, h] = [g.w, g.h];
       const okD = G.PRESETS.filter((d) => { const s = G.slotGrid(w, h, d, xs.slots, X_BITS[xs.colours], GECC[xs.ecc]); return s && s.cell >= 4; });
       const fix = okD.length ? `density ${Math.max(...okD)} or lower` : 'fewer codes per frame';
-      $('xDensNote').textContent = `Each square is ${c} pixels in the GIF. ` + (c >= 4
+      $('xDensNote').textContent = `Each square is ${c} pixels in the ${animName()}. ` + (c >= 4
         ? 'Shown at its own size or bigger, a phone camera reads it live.'
         : c >= 3
-          ? `Show it bigger than its own size, or hold the phone close. For easy reading at this GIF size: ${fix}.`
-          : `Too small for a camera at its own size: show it enlarged without blurring, choose a bigger GIF size, or ${fix}. Fine for Import.`);
+          ? `Show it bigger than its own size, or hold the phone close. For easy reading at this size: ${fix}.`
+          : `Too small for a camera at its own size: show it enlarged without blurring, choose a bigger size, or ${fix}. Fine for Import.`);
       $('xColNote').textContent = { 2: 'Black and white: the most robust.', 4: 'The usual choice.', 8: 'The most data, needs a sharp camera close up.' }[xs.colours];
     } else {
       // shown full screen on a Full HD screen (landscape; a tall code on a phone held upright): pixels per square
@@ -13541,9 +13817,9 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       ? `Extra repair pieces: any ${need} of the ${n} ${unit[1]} rebuild the file, so some can be lost, torn or unreadable.`
       : `No spare: every ${unit[0]} must be read.`;
     const per = (L.blocks.length * C.BLOCK * T) / 1024;
-    // a GIF's size is measured on its first frame (preview); until then, a rough guess from its pixels
+    // an animation's size is measured on its first frame (preview); until then, a rough guess from its pixels
     const est = xs.format === 'gif'
-      ? (xPrev.gifBytes && xPrev.gifKey === xKey() ? xPrev.gifBytes : g.w * g.h * 0.11) * n + 1000
+      ? (xPrev.gifBytes && xPrev.gifKey === xKey() ? xPrev.gifBytes : g.w * g.h * (xs.anim === 'apng' ? 0.025 : 0.11)) * n + 1000
       : ((L.W * L.H * L.bits) / 8) * { pdf: 2.0, png: 2.7, html: 1.4 }[xs.format] * plan.frames + (xs.format === 'html' ? 6000 : 2000);
     $('xCount').textContent = n.toLocaleString();
     $('xCountL').textContent = n === 1 ? unit[0] : unit[1];
@@ -13572,7 +13848,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     const plan = prepared && xPlan();
     el.hidden = !plan;
     if (!plan) return;
-    const what = { pdf: ['printed page', 'printed pages'], png: ['image', 'images'], html: ['slideshow frame', 'slideshow frames'], gif: ['GIF frame', 'GIF frames'] }[xs.format];
+    const what = { pdf: ['printed page', 'printed pages'], png: ['image', 'images'], html: ['slideshow frame', 'slideshow frames'], gif: ['frame', 'frames'] }[xs.format];
     el.innerHTML = `This file: <b>${plan.units.toLocaleString()} ${plan.units === 1 ? what[0] : what[1]}</b>${plan.T > 1 ? ` of ${plan.T} codes` : ''} at density ${xs.dens}, ${xs.colours} colours. Change it in Export.`;
   }
 
@@ -13582,7 +13858,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   const xPrev = { gen: 0, key: '', plan: null, frames: [], checks: [], payload: null, timer: 0, worker: null, enc: null };
   function xKey() {
     return JSON.stringify([prepared && prepared.payload && prepared.payload.length, prepared && prepared.mode, prepared && prepared.file.name, password,
-      xs.format, xs.format === 'pdf' ? xs.page + xs.tiles : xs.format === 'gif' ? `${xs.shape}${xs.gsize}x${xs.slots}` : xs.shape, xs.dens, xs.colours, xs.ecc, xs.extra]);
+      xs.format, xs.format === 'pdf' ? xs.page + xs.tiles : xs.format === 'gif' ? `${xs.anim}${xs.shape}${xs.gsize}x${xs.slots}` : xs.shape, xs.dens, xs.colours, xs.ecc, xs.extra]);
   }
   // the encrypted payload is made once per password, so the preview and the export match
   async function xPayload() {
@@ -13705,9 +13981,9 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       b.classList.remove('wait');
       if (i === 0 && xs.format === 'gif' && g.sg) {
         // the first frame, encoded as the export will: its size makes the file size estimate
-        const wr = X.gifWriter(g.w, g.h, plan.L.table, xs.fps);
-        wr.add(X.gifFrame(G.composeSlots(g.sg, xPrev.frames.slice(0, T)), g.sg.cw, g.sg.ch, g.sg.cell, g.w, g.h, plan.L.WHITE));
-        xPrev.gifBytes = (await wr.done().arrayBuffer()).byteLength - 800;
+        const apng = xs.anim === 'apng', wr = apng ? X.apngWriter(g.w, g.h, plan.L.table, xs.fps) : X.gifWriter(g.w, g.h, plan.L.table, xs.fps);
+        await wr.add(X.gifFrame(G.composeSlots(g.sg, xPrev.frames.slice(0, T)), g.sg.cw, g.sg.ch, g.sg.cell, g.w, g.h, plan.L.WHITE));
+        xPrev.gifBytes = (await wr.done().arrayBuffer()).byteLength - (apng ? 120 : 800);
         xPrev.gifKey = gifKey;
         if (gen === xPrev.gen) renderExport();
       }
@@ -13830,6 +14106,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
   $('xPage').addEventListener('click', (e) => { const b = e.target.closest('[data-p]'); if (b) xSet('page', b.dataset.p); });
   $('xShape').addEventListener('click', (e) => { const b = e.target.closest('[data-s]'); if (b) xSet('shape', b.dataset.s); });
   $('xGsize').addEventListener('click', (e) => { const b = e.target.closest('[data-gs]'); if (b) xSet('gsize', Number(b.dataset.gs)); });
+  $('xAnim').addEventListener('click', (e) => { const b = e.target.closest('[data-an]'); if (b) xSet('anim', b.dataset.an); });
   $('xSlots').addEventListener('click', (e) => { const b = e.target.closest('[data-sl]'); if (b) xSet('slots', Number(b.dataset.sl)); });
   $('xTiles').addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (b) xSet('tiles', Number(b.dataset.t)); });
   $('xColours').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (b) xSet('colours', Number(b.dataset.c)); });
@@ -13909,17 +14186,17 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
         blob = new Blob([X.zip(files)], { type: 'application/zip' });
         name = base + '-images.zip';
       } else if (xs.format === 'gif') {
-        const sg = gg.sg, wr = X.gifWriter(gg.w, gg.h, L.table, xs.fps);
+        const apng = xs.anim === 'apng', sg = gg.sg, wr = apng ? X.apngWriter(gg.w, gg.h, L.table, xs.fps) : X.gifWriter(gg.w, gg.h, L.table, xs.fps);
         for (let i = 0; i < n; i++) {
           const idxs = [];
           for (let t = 0; t < T; t++) idxs.push(nextFrame());
-          wr.add(X.gifFrame(G.composeSlots(sg, idxs), sg.cw, sg.ch, sg.cell, gg.w, gg.h, L.WHITE));
+          await wr.add(X.gifFrame(G.composeSlots(sg, idxs), sg.cw, sg.ch, sg.cell, gg.w, gg.h, L.WHITE));
           at(i + 1, n);
           await yieldUi();
           if (job.cancelled) throw new Error('cancelled');
         }
         blob = wr.done();
-        name = base + '.gif';
+        name = base + (apng ? '-animated.png' : '.gif');
       } else {
         const frames = [];
         for (let i = 0; i < n; i++) {
@@ -13934,7 +14211,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       }
       if (job.cancelled) return;
       xKeep();
-      prefs.x = { format: xs.format, page: xs.page, shape: xs.shape, tiles: xs.tiles, gsize: xs.gsize, slots: xs.slots };
+      prefs.x = { format: xs.format, page: xs.page, shape: xs.shape, tiles: xs.tiles, gsize: xs.gsize, slots: xs.slots, anim: xs.anim };
       prefs.xf = { ...xf };
       savePrefs();
       job.blob = blob;
@@ -13990,7 +14267,7 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
     else $('impStat').textContent = imp.images ? `No Beam codes found yet (${what}).` : 'Reading…';
     $('impHint').textContent = imp.running ? ''
       : imp.K ? 'Not enough yet. Add more pages or images (any you haven’t added).'
-        : 'Add Beam’s exported PDF, images, slideshow or GIF, or photos of the printed pages.';
+        : 'Add Beam’s exported PDF, images, slideshow, GIF or animated PNG, or photos of the printed pages.';
   }
   function closeImport() {
     if (imp) { imp.cancelled = true; imp.asm.terminate(); imp.worker.terminate(); }
@@ -14053,6 +14330,11 @@ addEventListener('resize',fit);pre[0].onload=fit;show();run();
       const r = X.gifReader(new Uint8Array(await f.arrayBuffer()));
       if (r && r.count > 1) return Array.from({ length: r.count }, (_, i) => ({ w: r.w, h: r.h, load: async () => r.next().rgba, label: `${name}, frame ${i + 1}` }));
       return [{ blob: f, label: name }];
+    }
+    if (head[0] === 137 && head[1] === 80 && head[2] === 78 && head[3] === 71) {
+      // an animated PNG (Beam's export): every frame, read one at a time; a still PNG goes the usual way
+      const r = X.apngReader(new Uint8Array(await f.arrayBuffer()));
+      if (r && r.count > 1) return Array.from({ length: r.count }, (_, i) => ({ w: r.w, h: r.h, load: async () => (await r.next()).rgba, label: `${name}, frame ${i + 1}` }));
     }
     if (/\.html?$/i.test(name) || f.type === 'text/html') {
       const urls = X.slideshowImages(await f.text());
